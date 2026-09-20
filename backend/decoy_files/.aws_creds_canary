@@ -1,0 +1,3 @@
+# PHANTOM HONEYPOT DECOY: .aws_creds_canary
+# TRAP_ID: canary_.aws_creds_canary
+ALERT_WEBHOOK=http://127.0.0.1:8001/api/canary/trip

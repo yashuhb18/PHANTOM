@@ -1,0 +1,58 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-base-light text-primary-light dark:bg-base-dark dark:text-primary-dark font-sans;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  /* Custom minimal scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #E7E5E4;
+    border-radius: 3px;
+  }
+  .dark ::-webkit-scrollbar-thumb {
+    background: #3F3F46;
+  }
+}
+
+@layer utilities {
+  .text-page-title {
+    font-size: 28px;
+    line-height: 1.2;
+    font-weight: 700;
+  }
+  
+  .text-section-header {
+    font-size: 18px;
+    line-height: 1.2;
+    font-weight: 600;
+  }
+
+  .text-body {
+    font-size: 14px;
+    line-height: 1.5;
+    font-weight: 400;
+  }
+
+  .text-meta {
+    font-size: 12px;
+    line-height: 1.4;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+
+  .card-surface {
+    @apply bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-card p-3;
+  }
+}
