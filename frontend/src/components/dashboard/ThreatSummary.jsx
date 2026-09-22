@@ -5,7 +5,7 @@ export function ThreatSummary({ stats }) {
   const items = [
     {
       title: 'Autonomous Neutralizations',
-      value: stats?.containmentCount || 2,
+      value: stats?.containmentCount ?? 0,
       desc: '100% mitigated without human intervention',
       icon: ShieldAlert,
       color: 'text-red-600',
@@ -14,7 +14,7 @@ export function ThreatSummary({ stats }) {
     },
     {
       title: 'Canary Decoy Hits',
-      value: stats?.canaryHits || 3,
+      value: stats?.canaryHits ?? 0,
       desc: 'Zero false-positive deception triggers',
       icon: Flame,
       color: 'text-amber-600',
@@ -23,7 +23,7 @@ export function ThreatSummary({ stats }) {
     },
     {
       title: 'Attack DNA Clusters',
-      value: stats?.clusterCount || 2,
+      value: stats?.clusterCount ?? 0,
       desc: 'Cross-hardware behavioral similarity matches',
       icon: Dna,
       color: 'text-indigo-600',

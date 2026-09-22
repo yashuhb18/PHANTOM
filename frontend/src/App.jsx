@@ -16,10 +16,11 @@ import { IncidentReports } from './pages/IncidentReports';
 import { Settings } from './pages/Settings';
 import { Login } from './pages/Login';
 import { LandingPage } from './pages/LandingPage';
+import { HardwarePorts } from './pages/HardwarePorts';
 
 function AppContent() {
   const [currentTab, setCurrentTab] = useState('landing');
-  const [selectedSessionId, setSelectedSessionId] = useState('sess_demo_stage1_ducky');
+  const [selectedSessionId, setSelectedSessionId] = useState(null);
   const { isAuthenticated } = useAuthContext();
 
   // If user navigates to login
@@ -37,6 +38,9 @@ function AppContent() {
     <Layout currentTab={currentTab} setTab={setCurrentTab}>
       {currentTab === 'dashboard' && (
         <Dashboard setTab={setCurrentTab} setSelectedSessionId={setSelectedSessionId} />
+      )}
+      {currentTab === 'ports' && (
+        <HardwarePorts setTab={setCurrentTab} setSelectedSessionId={setSelectedSessionId} />
       )}
       {currentTab === 'live' && <LiveMonitor />}
       {currentTab === 'sessions' && (

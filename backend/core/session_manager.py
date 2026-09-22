@@ -104,6 +104,14 @@ class SessionManager:
         conn.close()
         return dict(row) if row else None
 
+    def get_active_session(self) -> Optional[Dict[str, Any]]:
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM sessions WHERE status = 'ACTIVE' ORDER BY inserted_at DESC LIMIT 1")
+        row = cursor.fetchone()
+        conn.close()
+        return dict(row) if row else None
+
     def list_sessions(self, limit: int = 50) -> List[Dict[str, Any]]:
         conn = get_db()
         cursor = conn.cursor()

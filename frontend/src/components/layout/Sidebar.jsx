@@ -9,7 +9,8 @@ import {
   FileText, 
   Settings, 
   LogOut,
-  ShieldCheck
+  ShieldCheck,
+  Usb
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -18,6 +19,7 @@ export function Sidebar({ currentTab, setTab }) {
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'ports', label: 'Hardware & Ports', icon: Usb, badge: 'PORTS' },
     { id: 'live', label: 'Live Monitor', icon: Activity, badge: 'LIVE' },
     { id: 'sessions', label: 'Session Detail', icon: GitCommit },
     { id: 'threat-intel', label: 'Threat Intel & DNA', icon: Dna },

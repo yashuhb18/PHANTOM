@@ -146,6 +146,24 @@ def init_db():
         )
     """)
 
+    # 9. File Scans (Threat Scanner Results)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS file_scans (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            session_id TEXT NOT NULL,
+            file_path TEXT NOT NULL,
+            file_name TEXT NOT NULL,
+            file_type TEXT NOT NULL,
+            file_size INTEGER,
+            sha256_hash TEXT,
+            threat_score INTEGER DEFAULT 0,
+            threat_indicators TEXT,
+            action_taken TEXT DEFAULT 'ANALYZED',
+            scanned_at TEXT NOT NULL,
+            FOREIGN KEY (session_id) REFERENCES sessions(session_id)
+        )
+    """)
+
     conn.commit()
 
     # Seed default decoy traps if empty

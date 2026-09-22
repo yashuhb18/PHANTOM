@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from backend.config import HOST, PORT, DEBUG
-from backend.database import init_db
+from backend.database import init_db, get_db
 from backend.core.canary_manager import canary_manager
 from backend.api.routes_sessions import router as sessions_router
 from backend.api.routes_alerts import router as alerts_router
@@ -12,7 +12,13 @@ from backend.api.routes_canary import router as canary_router
 from backend.api.routes_reports import router as reports_router
 from backend.api.routes_devices import router as devices_router
 from backend.api.routes_simulate import router as simulate_router
+from backend.api.routes_scans import router as scans_router
 from backend.api.ws_routes import router as ws_router
+
+import asyncio
+from backend.agent.usb_monitor import usb_monitor
+from backend.agent.process_monitor import process_monitor
+from backend.agent.autorun_guardian import autorun_guardian
 
 logging.basicConfig(
     level=logging.INFO,
@@ -25,18 +31,50 @@ async def lifespan(app: FastAPI):
     # Startup
     logger.info("Initializing PHANTOM Database...")
     init_db()
+    # Clean up stale active sessions from previous runs
+    try:
+        from backend.database import get_db
+        conn = get_db()
+        conn.cursor().execute("UPDATE sessions SET status = 'CLOSED_AT_BOOT' WHERE status = 'ACTIVE'")
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        logger.debug(f"Error resetting stale sessions: {e}")
     logger.info("Starting Canary Deception Watcher...")
     canary_manager.start_monitoring()
+    logger.info("Starting Autonomous Hardware & USB Monitor Daemon...")
+    loop = asyncio.get_running_loop()
+    usb_monitor.start(loop=loop)
+    logger.info("Starting Autonomous Process Surveillance & Containment Agent...")
+    process_monitor.start(loop=loop)
+    logger.info("Starting Autorun Guardian Agent...")
+    autorun_guardian.start(loop=loop)
     logger.info(f"PHANTOM Platform ready on http://{HOST}:{PORT}")
+    logger.info("═══════════════════════════════════════════════════════════")
+    logger.info("  PHANTOM AUTONOMOUS AGENTS ONLINE:")
+    logger.info("    ✅ Hardware & USB Monitor Daemon")
+    logger.info("    ✅ Process Surveillance & Containment Agent")
+    logger.info("    ✅ Autorun Guardian Agent")
+    logger.info("    ✅ Threat Scanner (on-demand per USB insertion)")
+    logger.info("    ✅ Canary Deception Grid")
+    logger.info("  All agents operating in FULL AUTONOMOUS MODE")
+    logger.info("  Zero human intervention required.")
+    logger.info("═══════════════════════════════════════════════════════════")
     yield
     # Shutdown
+    logger.info("Shutting down Autorun Guardian Agent...")
+    autorun_guardian.stop()
+    logger.info("Shutting down Autonomous Process Surveillance Agent...")
+    process_monitor.stop()
+    logger.info("Shutting down Hardware & USB Monitor Daemon...")
+    usb_monitor.stop()
     logger.info("Shutting down Canary Deception Watcher...")
     canary_manager.stop_monitoring()
 
 app = FastAPI(
     title="PHANTOM: Autonomous USB Threat Hunting & Deception Platform",
     description="Precision USB threat hunting, behavioral DNA fingerprinting, deception grid, and autonomous containment API.",
-    version="1.0.0",
+    version="2.0.0",
     lifespan=lifespan
 )
 
@@ -57,11 +95,49 @@ app.include_router(canary_router)
 app.include_router(reports_router)
 app.include_router(devices_router)
 app.include_router(simulate_router)
+app.include_router(scans_router)
 app.include_router(ws_router)
 
 @app.get("/health")
 def health():
     return {"status": "healthy"}
+
+@app.get("/api/stats")
+def get_system_stats():
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT COUNT(*) FROM alerts WHERE alert_type LIKE '%CONTAINMENT%' OR alert_type LIKE '%ISOLATE%' OR title LIKE '%Containment%' OR alert_type LIKE '%PROCESS_TERMINATION%' OR alert_type LIKE '%FILE_QUARANTINE%' OR alert_type LIKE '%AUTORUN%' OR alert_type LIKE '%PROCESS_TREE%'")
+    containment_count = cursor.fetchone()[0]
+    cursor.execute("SELECT COUNT(*) FROM canary_hits")
+    canary_hits = cursor.fetchone()[0]
+    cursor.execute("SELECT COUNT(DISTINCT cluster_family) FROM fingerprints")
+    cluster_count = cursor.fetchone()[0]
+    cursor.execute("SELECT COUNT(*) FROM sessions")
+    total_sessions = cursor.fetchone()[0]
+    cursor.execute("SELECT COUNT(*) FROM sessions WHERE status = 'ACTIVE'")
+    active_sessions = cursor.fetchone()[0]
+    
+    # New: file scan stats
+    quarantined_files = 0
+    threats_detected = 0
+    try:
+        cursor.execute("SELECT COUNT(*) FROM file_scans WHERE action_taken = 'QUARANTINED'")
+        quarantined_files = cursor.fetchone()[0]
+        cursor.execute("SELECT COUNT(*) FROM file_scans WHERE threat_score >= 25")
+        threats_detected = cursor.fetchone()[0]
+    except Exception:
+        pass  # Table may not exist yet
+    
+    conn.close()
+    return {
+        "containmentCount": containment_count,
+        "canaryHits": canary_hits,
+        "clusterCount": cluster_count,
+        "totalSessions": total_sessions,
+        "activeSessions": active_sessions,
+        "quarantinedFiles": quarantined_files,
+        "threatsDetected": threats_detected
+    }
 
 from fastapi.responses import FileResponse
 
@@ -101,8 +177,15 @@ else:
         return {
             "platform": "PHANTOM",
             "status": "OPERATIONAL",
-            "version": "1.0.0",
-            "docs": "/docs"
+            "version": "2.0.0",
+            "docs": "/docs",
+            "agents": [
+                "USB Monitor Daemon",
+                "Process Surveillance & Containment",
+                "Autorun Guardian",
+                "Threat Scanner",
+                "Canary Deception Grid"
+            ]
         }
 
 if __name__ == "__main__":
