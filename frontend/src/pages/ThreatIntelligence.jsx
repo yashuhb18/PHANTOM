@@ -3,6 +3,7 @@ import { FingerprintList } from '../components/intelligence/FingerprintList';
 import { SimilarityGraph } from '../components/intelligence/SimilarityGraph';
 import { SimulateButton } from '../components/common/SimulateButton';
 import { LoadingState } from '../components/common/LoadingState';
+import { Dna } from 'lucide-react';
 
 export function ThreatIntelligence() {
   const [fingerprints, setFingerprints] = useState([]);
@@ -40,13 +41,19 @@ export function ThreatIntelligence() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       {/* Top Banner */}
-      <div className="bg-white border border-[#E7E5E4] rounded-xl p-5 flex flex-col md:flex-row items-center justify-between gap-4">
-        <div>
-          <h2 className="text-sm font-bold text-[#1C1917]">Attack DNA Fingerprint Engine</h2>
-          <p className="text-xs text-[#78716C] mt-0.5">
-            Cross-hardware behavioral similarity engine. Detects identical threat actors even when they change physical USB hardware.
-          </p>
+      <div className="bg-[#141414] border border-white/[0.08] rounded-[28px] p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-2xl">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-neutral-900 border border-white/[0.08] flex items-center justify-center text-[#FDE047] shrink-0">
+            <Dna className="w-6 h-6" />
+          </div>
+          <div>
+            <h2 className="text-sm font-bold text-white tracking-tight uppercase">Attack DNA Fingerprint Engine</h2>
+            <p className="text-xs text-neutral-400 mt-1">
+              Cross-hardware behavioral similarity engine. Correlates identical threat actors even when physical USB devices are swapped.
+            </p>
+          </div>
         </div>
+
         <div className="flex items-center gap-3">
           <SimulateButton stage={2} onComplete={() => loadData()} />
         </div>

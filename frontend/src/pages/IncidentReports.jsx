@@ -44,13 +44,13 @@ export function IncidentReports({ initialSessionId = 'sess_demo_stage1_ducky' })
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       {/* Session Report Selector */}
-      <div className="bg-white border border-[#E7E5E4] rounded-xl p-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <span className="text-xs font-semibold text-[#1C1917]">Select Incident:</span>
+      <div className="bg-[#141414] border border-white/[0.08] rounded-[28px] p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xl">
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          <span className="text-xs font-bold text-white uppercase tracking-wider">Select Incident:</span>
           <select
             value={selectedSessionId}
             onChange={(e) => setSelectedSessionId(e.target.value)}
-            className="text-xs bg-[#FAFAF9] border border-[#E7E5E4] rounded-lg px-3 py-1.5 text-[#1C1917] font-mono focus:outline-none focus:border-indigo-500"
+            className="text-xs bg-[#0A0A0A] border border-white/[0.1] rounded-full px-4 py-2 text-white font-mono focus:outline-none focus:border-[#FDE047]"
           >
             <option value="sess_demo_stage1_ducky">sess_demo_stage1_ducky (RubberDucky)</option>
             <option value="sess_demo_stage2_bunny">sess_demo_stage2_bunny (BashBunny)</option>
@@ -62,7 +62,7 @@ export function IncidentReports({ initialSessionId = 'sess_demo_stage1_ducky' })
           </select>
         </div>
 
-        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200">
+        <span className="text-[10px] font-mono font-bold px-3 py-1 rounded-full bg-[#FDE047]/10 text-[#FDE047] border border-[#FDE047]/30 uppercase">
           AI FORENSIC ENGINE
         </span>
       </div>

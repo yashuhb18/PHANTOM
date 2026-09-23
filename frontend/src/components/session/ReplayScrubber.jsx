@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Play, Pause, RotateCcw, FastForward } from 'lucide-react';
+import { Play, Pause, RotateCcw } from 'lucide-react';
 
 export function ReplayScrubber({ totalFrames = 6, currentFrame, onChangeFrame }) {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -21,14 +21,14 @@ export function ReplayScrubber({ totalFrames = 6, currentFrame, onChangeFrame })
   }, [isPlaying, totalFrames, onChangeFrame]);
 
   return (
-    <div className="bg-white border border-[#E7E5E4] rounded-xl p-4">
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-2">
+    <div className="bg-[#141414] border border-white/[0.06] rounded-[28px] p-6 shadow-2xl">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3">
           <button
             onClick={() => setIsPlaying(!isPlaying)}
-            className="p-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white transition-colors"
+            className="w-10 h-10 rounded-full bg-[#FDE047] hover:bg-[#FACC15] text-black flex items-center justify-center transition-all pill-button shadow-lg shadow-[#FDE047]/10 cursor-pointer"
           >
-            {isPlaying ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current" />}
+            {isPlaying ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current ml-0.5" />}
           </button>
           <button
             onClick={() => {
@@ -36,20 +36,20 @@ export function ReplayScrubber({ totalFrames = 6, currentFrame, onChangeFrame })
               onChangeFrame(0);
             }}
             title="Reset to frame 0"
-            className="p-2 rounded-lg border border-[#E7E5E4] hover:bg-[#F5F5F4] text-[#78716C]"
+            className="w-10 h-10 rounded-full border border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.06] text-neutral-400 hover:text-white flex items-center justify-center transition-all pill-button cursor-pointer"
           >
             <RotateCcw className="w-4 h-4" />
           </button>
-          <span className="text-xs font-semibold text-[#1C1917]">Time-Travel Attack Replay</span>
+          <span className="text-xs font-bold text-white uppercase tracking-wider ml-1">Time-Travel Attack Replay</span>
         </div>
 
-        <div className="flex items-center gap-2 text-xs font-mono text-[#78716C]">
-          <span>FRAME: <strong className="text-indigo-600">{currentFrame + 1}</strong> / {totalFrames}</span>
+        <div className="flex items-center gap-2 text-xs font-mono text-neutral-400">
+          <span>FRAME: <strong className="text-[#FDE047]">{currentFrame + 1}</strong> / {totalFrames}</span>
         </div>
       </div>
 
       {/* Audio-style scrubber track */}
-      <div className="relative mt-3">
+      <div className="relative mt-4">
         <input
           type="range"
           min="0"
@@ -59,13 +59,13 @@ export function ReplayScrubber({ totalFrames = 6, currentFrame, onChangeFrame })
             setIsPlaying(false);
             onChangeFrame(parseInt(e.target.value));
           }}
-          className="w-full h-2 bg-[#E7E5E4] rounded-lg appearance-none cursor-pointer accent-indigo-600"
+          className="w-full h-2 bg-neutral-900 rounded-full appearance-none cursor-pointer accent-[#FDE047]"
         />
-        <div className="flex justify-between text-[10px] font-mono text-[#A8A29E] mt-1">
+        <div className="flex justify-between text-[10px] font-mono text-neutral-500 mt-2">
           <span>T+00:00 (Insertion)</span>
-          <span>T+00:02 (Payload)</span>
+          <span>T+00:02 (Payload Burst)</span>
           <span>T+00:04 (Decoy Trip)</span>
-          <span>T+00:05 (Containment)</span>
+          <span>T+00:05 (Autonomous Containment)</span>
         </div>
       </div>
     </div>

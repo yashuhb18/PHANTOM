@@ -187,7 +187,8 @@ class ThreatScanner:
     """
 
     QUARANTINE_SUFFIX = ".PHANTOM_QUARANTINED"
-    THREAT_SCORE_QUARANTINE_THRESHOLD = 25  # Auto-quarantine if score >= this
+    AUTO_QUARANTINE_ENABLED = False  # Defer destructive actions to user choice (Eject / Delete)
+    THREAT_SCORE_QUARANTINE_THRESHOLD = 25  # Threat detection threshold
     MAX_FILE_SIZE_FOR_CONTENT_SCAN = 10 * 1024 * 1024  # 10 MB max for content scanning
 
     def __init__(self):
@@ -240,8 +241,8 @@ class ThreatScanner:
                 self._record_scan_result(result)
                 self._broadcast_scan_event(result, session_id)
 
-                # Auto-quarantine if threat score is high enough
-                if result["threat_score"] >= self.THREAT_SCORE_QUARANTINE_THRESHOLD:
+                # Auto-quarantine if enabled and threat score is high enough
+                if self.AUTO_QUARANTINE_ENABLED and result["threat_score"] >= self.THREAT_SCORE_QUARANTINE_THRESHOLD:
                     self._quarantine_file(filepath, result, session_id)
 
             return result
@@ -329,8 +330,8 @@ class ThreatScanner:
                     # Broadcast finding
                     self._broadcast_scan_event(result, session_id)
 
-                    # AUTO-QUARANTINE high-risk files
-                    if result["threat_score"] >= self.THREAT_SCORE_QUARANTINE_THRESHOLD:
+                    # Auto-quarantine if enabled and high-risk
+                    if self.AUTO_QUARANTINE_ENABLED and result["threat_score"] >= self.THREAT_SCORE_QUARANTINE_THRESHOLD:
                         self._quarantine_file(filepath, result, session_id)
                         scan_state["quarantined_files"] += 1
 
@@ -408,65 +409,62 @@ class ThreatScanner:
         )
 
         # ═══════════════════════════════════════════════════════════════
-        # AUTONOMOUS USB EJECT — If threats detected, eject the drive!
+        # USER-CONTROLLED USB EJECT — Threats detected, eject left to user
         # ═══════════════════════════════════════════════════════════════
         if scan_state["dangerous_files"] > 0:
-            logger.warning(f"🔌 THREATS DETECTED — AUTO-EJECTING USB DRIVE: {mount_point}")
-            try:
-                from backend.core.response_engine import response_engine
-                eject_result = response_engine.eject_usb_drive(
-                    mount_point=mount_point,
-                    session_id=session_id,
-                    reason=f"Autonomous eject: {scan_state['dangerous_files']} dangerous files detected, {scan_state['quarantined_files']} quarantined"
-                )
+            threat_names = [f.get("file_name", "threat_file") for f in scan_state["findings"]]
+            threat_files_summary = ", ".join(threat_names) if threat_names else "dangerous files"
+            logger.warning(
+                f"⚠️ THREATS DETECTED ON USB DRIVE: {mount_point} "
+                f"({threat_files_summary}). "
+                f"Auto-eject disabled — awaiting user decision to eject."
+            )
 
-                # Broadcast eject event
-                eject_event = {
-                    "source": "THREAT_SCANNER",
-                    "event_type": "USB_AUTO_EJECTED",
-                    "severity": "CRITICAL",
-                    "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-                    "session_id": session_id,
-                    "data": {
-                        "mount_point": mount_point,
-                        "ejected": eject_result.get("ejected", False),
-                        "reason": f"{scan_state['dangerous_files']} dangerous files detected",
-                        "quarantined_count": scan_state["quarantined_files"],
-                        "status": eject_result.get("status", "UNKNOWN")
-                    }
+            # Broadcast threat notification with user eject option
+            threat_event = {
+                "source": "THREAT_SCANNER",
+                "event_type": "USB_THREAT_ACTION_REQUIRED",
+                "severity": "CRITICAL",
+                "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                "session_id": session_id,
+                "data": {
+                    "mount_point": mount_point,
+                    "dangerous_files": scan_state["dangerous_files"],
+                    "quarantined_files": scan_state["quarantined_files"],
+                    "threat_files": threat_names,
+                    "primary_threat": threat_names[0] if threat_names else "something.bat",
+                    "status": "AWAITING_USER_EJECT",
+                    "reason": f"Threat detected: {threat_files_summary} is inside this folder. You need to eject as early as possible or eject now.",
+                    "can_eject": True,
+                    "findings": scan_state["findings"]
                 }
-                self._broadcast_safe(ws_manager.broadcast_live(eject_event))
+            }
+            self._broadcast_safe(ws_manager.broadcast_live(threat_event))
 
-                eject_status = "EJECTED" if eject_result.get("ejected") else "EJECT ATTEMPTED"
-                self._broadcast_safe(ws_manager.broadcast_narrator({
-                    "session_id": session_id,
-                    "narration": (
-                        f"🔌 AUTONOMOUS USB EJECT {eject_status}: Drive {mount_point} has been "
-                        f"{'forcefully ejected' if eject_result.get('ejected') else 'flagged for ejection'} "
-                        f"after detecting {scan_state['dangerous_files']} dangerous files. "
-                        f"Threat contained. USB physically neutralized."
-                    ),
-                    "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
-                }))
+            self._broadcast_safe(ws_manager.broadcast_narrator({
+                "session_id": session_id,
+                "narration": (
+                    f"⚠️ CRITICAL THREAT DETECTED ON {mount_point}: '{threat_files_summary}' detected inside drive folder. "
+                    f"PowerShell auto-invocation payload identified. You need to eject as early as possible or eject now."
+                ),
+                "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+            }))
 
-                # Record eject event in session
-                eject_session_event = event_collector.normalize_event(
-                    session_id=session_id,
-                    source="THREAT_SCANNER",
-                    event_type="USB_AUTO_EJECTED",
-                    severity="CRITICAL",
-                    data={
-                        "mount_point": mount_point,
-                        "ejected": eject_result.get("ejected", False),
-                        "dangerous_files": scan_state["dangerous_files"],
-                        "quarantined_files": scan_state["quarantined_files"]
-                    },
-                    risk_score_delta=20
-                )
-                session_manager.record_event(eject_session_event)
-
-            except Exception as e:
-                logger.error(f"Error during autonomous USB eject: {e}")
+            # Record threat alert in session
+            threat_session_event = event_collector.normalize_event(
+                session_id=session_id,
+                source="THREAT_SCANNER",
+                event_type="USB_THREAT_AWAITING_USER_EJECT",
+                severity="HIGH",
+                data={
+                    "mount_point": mount_point,
+                    "dangerous_files": scan_state["dangerous_files"],
+                    "quarantined_files": scan_state["quarantined_files"],
+                    "status": "AWAITING_USER_ACTION"
+                },
+                risk_score_delta=15
+            )
+            session_manager.record_event(threat_session_event)
 
     # ─────────────────────────────────────────────────────────────────────
     # FILE ANALYSIS ENGINE

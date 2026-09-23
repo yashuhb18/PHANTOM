@@ -74,7 +74,39 @@ class ResponseEngine:
         except Exception:
             pass
 
-        # 1b. Close open Windows Explorer windows to release folder handles
+        # 1b. Terminate any processes holding open handles or working directories on this drive
+        try:
+            curr_pid = os.getpid()
+            for proc in psutil.process_iter(['pid', 'name']):
+                try:
+                    if proc.pid in (0, 4, curr_pid):
+                        continue
+                    # Check CWD
+                    try:
+                        cwd = proc.cwd()
+                        if cwd and cwd.upper().startswith(drive_letter):
+                            pname = proc.name()
+                            proc.kill()
+                            details_list.append(f"Killed {pname} (CWD lock)")
+                            continue
+                    except Exception:
+                        pass
+                    # Check open files
+                    try:
+                        for f in proc.open_files():
+                            if f.path and f.path.upper().startswith(drive_letter):
+                                pname = proc.name()
+                                proc.kill()
+                                details_list.append(f"Killed {pname} (File lock: {os.path.basename(f.path)})")
+                                break
+                    except Exception:
+                        pass
+                except Exception:
+                    continue
+        except Exception as e:
+            logger.debug(f"Process lock cleanup error: {e}")
+
+        # 1c. Close open Windows Explorer windows to release folder handles
         try:
             import win32com.client
             import pythoncom
@@ -111,7 +143,22 @@ class ResponseEngine:
         except Exception as e:
             logger.debug(f"WMI dismount error: {e}")
 
-        # 2b. Kernel32 DeviceIoControl FSCTL_DISMOUNT_VOLUME & IOCTL_STORAGE_EJECT_MEDIA
+        # 2b. Mountvol: forcibly dismount and remove mount point from Windows
+        try:
+            import subprocess
+            mv_res = subprocess.run(["mountvol", f"{drive_letter}\\", "/p"], capture_output=True, text=True, timeout=5)
+            if mv_res.returncode == 0:
+                volume_dismounted = True
+                details_list.append("mountvol /p volume dismounted & invalidated")
+            else:
+                mv_res_d = subprocess.run(["mountvol", f"{drive_letter}\\", "/d"], capture_output=True, text=True, timeout=5)
+                if mv_res_d.returncode == 0:
+                    volume_dismounted = True
+                    details_list.append("mountvol /d volume detached")
+        except Exception as e:
+            logger.debug(f"mountvol error: {e}")
+
+        # 2c. Kernel32 DeviceIoControl FSCTL_DISMOUNT_VOLUME & IOCTL_STORAGE_EJECT_MEDIA
         try:
             import ctypes
             from ctypes import wintypes
@@ -146,8 +193,6 @@ class ResponseEngine:
                     details_list.append("Kernel32 FSCTL_DISMOUNT_VOLUME")
         except Exception as e:
             logger.debug(f"DeviceIoControl error: {e}")
-
-
 
         # ── PHASE 3: SAFE SHELL & VOLUME EJECTION ──
         try:

@@ -1,16 +1,17 @@
 import React from 'react';
-import { 
-  LayoutDashboard, 
-  Activity, 
-  GitCommit, 
-  Dna, 
-  ShieldAlert, 
-  Flame, 
-  FileText, 
-  Settings, 
+import {
+  LayoutDashboard,
+  Activity,
+  GitCommit,
+  Dna,
+  ShieldAlert,
+  Flame,
+  FileText,
+  Settings,
   LogOut,
   ShieldCheck,
-  Usb
+  Usb,
+  ArrowUpRight
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -30,28 +31,35 @@ export function Sidebar({ currentTab, setTab }) {
   ];
 
   return (
-    <aside className="w-64 bg-white border-r border-[#E7E5E4] flex flex-col justify-between shrink-0 h-screen sticky top-0 select-none">
+    <aside className="w-64 bg-[#0A0A0A] border-r border-white/[0.08] flex flex-col justify-between shrink-0 h-screen sticky top-0 select-none">
       <div>
         {/* Brand */}
-        <div className="h-16 flex items-center px-6 border-b border-[#E7E5E4] gap-3">
-          <img 
-            src="/logo.png" 
-            alt="PHANTOM" 
-            className="w-8 h-8 rounded-lg object-contain bg-black p-0.5 shadow-sm" 
-          />
-          <div>
-            <div className="flex items-center gap-1.5">
-              <span className="font-bold text-sm tracking-tight text-[#1C1917]">PHANTOM</span>
-              <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-medium bg-indigo-50 text-indigo-700 border border-indigo-200">
-                v1.0
-              </span>
-            </div>
-            <p className="text-[11px] text-[#78716C]">Autonomous Threat Platform</p>
+        <div className="h-16 flex items-center justify-between px-6 border-b border-white/[0.08]">
+          <div className="flex items-center gap-2.5">
+            <img
+              src="/phantom-logo-white.png"
+              alt="PHANTOM"
+              className="h-6 w-auto object-contain select-none"
+            />
           </div>
+          <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#FDE047] text-black">
+            v1.0
+          </span>
+        </div>
+
+        {/* Product Website Quick Jump */}
+        <div className="p-3">
+          <button
+            onClick={() => setTab('landing')}
+            className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-full text-xs font-bold bg-[#FDE047]/10 hover:bg-[#FDE047]/20 text-[#FDE047] border border-[#FDE047]/30 transition-all cursor-pointer group"
+          >
+            <span>Product Website</span>
+            <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+          </button>
         </div>
 
         {/* Navigation */}
-        <nav className="p-3 space-y-1">
+        <nav className="px-3 py-1 space-y-1">
           {navItems.map((item) => {
             const Icon = item.icon;
             const active = currentTab === item.id;
@@ -59,18 +67,20 @@ export function Sidebar({ currentTab, setTab }) {
               <button
                 key={item.id}
                 onClick={() => setTab(item.id)}
-                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
+                className={`w-full flex items-center justify-between px-4 py-2.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
                   active
-                    ? 'bg-indigo-50 text-indigo-900 font-semibold'
-                    : 'text-[#78716C] hover:bg-[#F5F5F4] hover:text-[#1C1917]'
+                    ? 'bg-[#FDE047] text-black shadow-lg shadow-[#FDE047]/10'
+                    : 'text-neutral-400 hover:text-white hover:bg-white/[0.04]'
                 }`}
               >
-                <div className="flex items-center gap-2.5">
-                  <Icon className={`w-4 h-4 ${active ? 'text-indigo-600' : 'text-[#A8A29E]'}`} />
+                <div className="flex items-center gap-3">
+                  <Icon className={`w-4 h-4 ${active ? 'text-black' : 'text-neutral-400'}`} />
                   <span>{item.label}</span>
                 </div>
                 {item.badge && (
-                  <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-red-50 text-red-600 border border-red-200 font-bold animate-pulse">
+                  <span className={`text-[9px] font-mono px-2 py-0.5 rounded-full font-extrabold ${
+                    active ? 'bg-black text-[#FDE047]' : 'bg-[#FDE047] text-black'
+                  }`}>
                     {item.badge}
                   </span>
                 )}
@@ -81,21 +91,21 @@ export function Sidebar({ currentTab, setTab }) {
       </div>
 
       {/* Footer Profile */}
-      <div className="p-3 border-t border-[#E7E5E4]">
-        <div className="flex items-center justify-between p-2 rounded-lg bg-[#FAFAF9] border border-[#E7E5E4]">
-          <div className="flex items-center gap-2 overflow-hidden">
-            <div className="w-7 h-7 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs">
+      <div className="p-4 border-t border-white/[0.08]">
+        <div className="flex items-center justify-between p-2.5 rounded-2xl bg-[#141414] border border-white/[0.06]">
+          <div className="flex items-center gap-2.5 overflow-hidden">
+            <div className="w-7 h-7 rounded-full bg-[#FDE047] text-black flex items-center justify-center font-black text-xs shrink-0">
               {user?.username?.[0]?.toUpperCase() || 'A'}
             </div>
             <div className="truncate">
-              <p className="text-xs font-medium text-[#1C1917] truncate">{user?.username || 'Analyst'}</p>
-              <p className="text-[10px] text-[#78716C] truncate">{user?.role || 'Security Team'}</p>
+              <p className="text-xs font-semibold text-white truncate">{user?.username || 'SecOps Lead'}</p>
+              <p className="text-[10px] text-neutral-400 truncate">{user?.role || 'Autonomous Enforcement'}</p>
             </div>
           </div>
-          <button 
+          <button
             onClick={logout}
             title="Sign out"
-            className="p-1 text-[#A8A29E] hover:text-[#1C1917] transition-colors rounded hover:bg-white"
+            className="p-1.5 text-neutral-400 hover:text-white transition-colors rounded-full hover:bg-white/10 cursor-pointer"
           >
             <LogOut className="w-3.5 h-3.5" />
           </button>

@@ -206,7 +206,7 @@ class ProcessMonitor:
         Deep-analyzes a new process to determine if it's a threat.
         Makes autonomous kill/allow decisions.
         """
-        # Whitelist PHANTOM backend itself, its parent process, and any children it spawns
+        # Whitelist PHANTOM backend itself, frontend dev server (node/vite), parent process, and project workspace
         try:
             my_pid = os.getpid()
             if pid == my_pid:
@@ -214,6 +214,12 @@ class ProcessMonitor:
             p = psutil.Process(pid)
             parent = p.parent()
             if parent and (parent.pid == my_pid or parent.pid == os.getppid()):
+                return
+
+            proc_cwd = (p.cwd() or "").lower()
+            proc_exe = (p.exe() or "").lower()
+            project_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))).lower()
+            if project_dir in proc_cwd or project_dir in proc_exe:
                 return
         except Exception:
             return
@@ -250,16 +256,15 @@ class ProcessMonitor:
         active_session = session_manager.get_active_session()
         usb_mount = ""
         if active_session:
-            usb_mount = active_session.get("mount_point", "").lower()
-            if usb_mount:
-                if usb_mount in cmdline or (exe_path and usb_mount in exe_path.lower()) or (cwd and usb_mount in cwd.lower()):
+            raw_mount = active_session.get("mount_point", "").lower()
+            clean_usb = raw_mount.rstrip("\\").rstrip("/")
+            if clean_usb:
+                # Require path separator to prevent false matches like 'node:process' matching 'e:'
+                if (f"{clean_usb}\\" in cmdline or f"{clean_usb}/" in cmdline or 
+                    (exe_path and f"{clean_usb}\\" in exe_path.lower()) or 
+                    (cwd and f"{clean_usb}\\" in cwd.lower())):
                     is_from_usb = True
                     detected_usb_mount = active_session.get("mount_point", "")
-                for arg in cmdline_list:
-                    if usb_mount in arg.lower():
-                        is_from_usb = True
-                        detected_usb_mount = active_session.get("mount_point", "")
-                        break
 
         # Also check all removable drive letters mounted on the machine
         if not is_from_usb:
@@ -267,16 +272,16 @@ class ProcessMonitor:
                 for part in psutil.disk_partitions(all=True):
                     if "removable" in part.opts.lower():
                         r_drive = part.device.rstrip("\\").rstrip("/").lower()
-                        if (r_drive in cmdline or 
-                            (exe_path and r_drive in exe_path.lower()) or 
-                            (cwd and r_drive in cwd.lower())):
+                        if (f"{r_drive}\\" in cmdline or f"{r_drive}/" in cmdline or
+                            (exe_path and f"{r_drive}\\" in exe_path.lower()) or 
+                            (cwd and f"{r_drive}\\" in cwd.lower())):
                             is_from_usb = True
                             detected_usb_mount = part.device
                             break
             except Exception:
                 pass
 
-        # Regex fallback for non-system drive letters in cmdline
+        # Regex fallback for non-system drive letters in cmdline (must be followed by slash)
         if not is_from_usb:
             import re
             m = re.search(r'\b([a-zA-Z]:)[/\\]', cmdline)
@@ -490,7 +495,7 @@ class ProcessMonitor:
             f"Session kills: {self._kill_count}"
         )
 
-        # 7. AUTONOMOUS USB EJECT — If threat is from USB or references USB, EJECT DRIVE IMMEDIATELY!
+        # 7. USER-CONTROLLED USB EJECT — If threat is from USB or references USB, notify user that ejection is available
         if is_from_usb or detected_usb_mount or threat_type in {"USB_ORIGIN_EXECUTION", "USB_TRIGGERED_SCRIPT_HOST", "ALWAYS_KILL_USB_PROCESS"}:
             eject_drive = detected_usb_mount
             if not eject_drive and active_session:
@@ -510,17 +515,11 @@ class ProcessMonitor:
                     pass
 
             if eject_drive:
-                logger.warning(f"🔌 CRITICAL USB THREAT CONTAINED — AUTO-EJECTING DRIVE: {eject_drive}")
+                logger.warning(f"⚠️ USB-LINKED PROCESS TERMINATED ({name} PID:{pid}) — Drive {eject_drive} remains mounted. Eject option available to user.")
                 try:
-                    eject_result = response_engine.eject_usb_drive(
-                        mount_point=eject_drive,
-                        session_id=session_id,
-                        reason=f"Autonomous containment: {threat_type} ({name} PID:{pid}) detected from {eject_drive}"
-                    )
-
-                    eject_event = {
+                    threat_action_event = {
                         "source": "PROCESS_MONITOR",
-                        "event_type": "USB_AUTO_EJECTED",
+                        "event_type": "USB_THREAT_ACTION_REQUIRED",
                         "severity": "CRITICAL",
                         "timestamp": now,
                         "session_id": session_id,
@@ -529,24 +528,23 @@ class ProcessMonitor:
                             "triggering_process": name,
                             "triggering_pid": pid,
                             "threat_type": threat_type,
-                            "ejected": eject_result.get("ejected", False),
-                            "details": eject_result.get("details", ""),
-                            "status": eject_result.get("status", "UNKNOWN")
+                            "status": "AWAITING_USER_EJECT",
+                            "can_eject": True,
+                            "reason": f"Malicious process {name} (PID: {pid}) terminated. Drive remains connected until user chooses to eject."
                         }
                     }
-                    self._broadcast_safe(ws_manager.broadcast_live(eject_event))
+                    self._broadcast_safe(ws_manager.broadcast_live(threat_action_event))
 
-                    eject_status_text = "forcefully ejected" if eject_result.get("ejected") else "ejection commanded"
                     self._broadcast_safe(ws_manager.broadcast_narrator({
                         "session_id": session_id,
                         "narration": (
-                            f"🔌 AUTONOMOUS USB EJECT: Removable drive {eject_drive} has been {eject_status_text} "
-                            f"following containment of threat '{name}'. Physical vector neutralized."
+                            f"🛡️ MALICIOUS PROCESS TERMINATED: Process '{name}' from {eject_drive} was killed immediately. "
+                            f"Drive remains mounted — click EJECT DRIVE when you wish to safely disconnect."
                         ),
                         "timestamp": now
                     }))
                 except Exception as e:
-                    logger.error(f"Error auto-ejecting USB drive {eject_drive}: {e}")
+                    logger.error(f"Error notifying user eject for USB drive {eject_drive}: {e}")
 
 
 process_monitor = ProcessMonitor()

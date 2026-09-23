@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { CanaryFileManager } from '../components/deception/CanaryFileManager';
 import { CanaryAlertLog } from '../components/deception/CanaryAlertLog';
 import { LoadingState } from '../components/common/LoadingState';
+import { Flame } from 'lucide-react';
 
 export function DeceptionTraps() {
   const [traps, setTraps] = useState([]);
@@ -47,14 +48,20 @@ export function DeceptionTraps() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       {/* Overview Banner */}
-      <div className="bg-white border border-[#E7E5E4] rounded-xl p-5 flex items-center justify-between">
-        <div>
-          <h2 className="text-sm font-bold text-[#1C1917]">Canary Deception Grid</h2>
-          <p className="text-xs text-[#78716C] mt-0.5">
-            Filesystem honeypots deployed on endpoints. Monitored via kernel `watchdog` to catch unauthorized discovery and harvesting.
-          </p>
+      <div className="bg-[#141414] border border-white/[0.08] rounded-[28px] p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-2xl">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-neutral-900 border border-white/[0.08] flex items-center justify-center text-[#FDE047] shrink-0">
+            <Flame className="w-6 h-6" />
+          </div>
+          <div>
+            <h2 className="text-sm font-bold text-white tracking-tight uppercase">Canary Deception Grid</h2>
+            <p className="text-xs text-neutral-400 mt-1">
+              Filesystem honeypots deployed on endpoints. Monitored via kernel watchdog to catch unauthorized discovery and harvesting.
+            </p>
+          </div>
         </div>
-        <span className="text-xs font-mono px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold">
+
+        <span className="text-xs font-mono px-3.5 py-1 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-bold">
           GRID ARMED
         </span>
       </div>

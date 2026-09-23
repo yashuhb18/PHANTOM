@@ -1,43 +1,43 @@
 import React from 'react';
-import { AlertOctagon, Terminal } from 'lucide-react';
+import { AlertOctagon } from 'lucide-react';
 import { AlertBadge } from '../common/AlertBadge';
 
 export function CanaryAlertLog({ hits }) {
   return (
-    <div className="bg-white border border-[#E7E5E4] rounded-xl overflow-hidden">
-      <div className="p-4 border-b border-[#E7E5E4] flex items-center justify-between bg-[#FAFAF9]">
-        <div className="flex items-center gap-2">
-          <AlertOctagon className="w-4 h-4 text-red-600" />
-          <h3 className="text-xs font-semibold text-[#1C1917]">Canary Tripwire Audit Log</h3>
+    <div className="bg-[#141414] border border-white/[0.06] rounded-[28px] overflow-hidden shadow-2xl">
+      <div className="px-6 py-4 border-b border-white/[0.06] flex items-center justify-between bg-[#0F0F0F]">
+        <div className="flex items-center gap-2.5">
+          <AlertOctagon className="w-4 h-4 text-red-400" />
+          <h3 className="text-xs font-bold text-white uppercase tracking-wide">Canary Tripwire Audit Log</h3>
         </div>
-        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-red-50 text-red-700 border border-red-200">
+        <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-red-500/15 text-red-400 border border-red-500/30 font-bold">
           ZERO FALSE POSITIVE
         </span>
       </div>
 
-      <div className="divide-y divide-[#E7E5E4]">
+      <div className="divide-y divide-white/[0.04]">
         {(!hits || hits.length === 0) ? (
-          <div className="p-8 text-center text-xs text-[#78716C]">
+          <div className="p-12 text-center text-xs text-neutral-500">
             No canary tripwire breaches recorded. Deception perimeter secure.
           </div>
         ) : (
           hits.map((hit) => (
-            <div key={hit.id} className="p-4 hover:bg-[#FAFAF9] transition-colors flex items-center justify-between">
+            <div key={hit.id} className="p-4 px-6 hover:bg-white/[0.02] transition-colors flex items-center justify-between">
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-red-600 font-mono">TRIP: {hit.filename}</span>
-                  <span className="text-[10px] font-mono bg-red-50 text-red-700 px-1.5 py-0.2 rounded border border-red-200 font-bold">
+                  <span className="text-xs font-bold text-red-400 font-mono">TRIP: {hit.filename}</span>
+                  <span className="text-[10px] font-mono bg-red-500/15 text-red-300 px-2 py-0.5 rounded-full border border-red-500/30 font-bold">
                     {hit.action}
                   </span>
                 </div>
-                <div className="flex items-center gap-2 mt-1 text-[11px] text-[#78716C]">
+                <div className="flex items-center gap-2 mt-1.5 text-[11px] text-neutral-400">
                   <span className="font-mono">{hit.timestamp?.slice(11, 19)} UTC</span>
                   <span>•</span>
-                  <span>Process: <code>{hit.process_name} (PID:{hit.process_id})</code></span>
+                  <span>Process: <code className="font-mono text-white bg-neutral-900 px-1.5 py-0.5 rounded-lg border border-white/[0.06]">{hit.process_name} (PID:{hit.process_id})</code></span>
                   {hit.session_id && (
                     <>
                       <span>•</span>
-                      <span className="font-mono text-indigo-600">{hit.session_id}</span>
+                      <span className="font-mono text-[#FDE047]">{hit.session_id}</span>
                     </>
                   )}
                 </div>

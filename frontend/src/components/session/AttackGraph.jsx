@@ -3,7 +3,7 @@ import React from 'react';
 export function AttackGraph({ graph, activeFrame }) {
   if (!graph || !graph.nodes || graph.nodes.length === 0) {
     return (
-      <div className="bg-white border border-[#E7E5E4] rounded-xl p-12 text-center text-xs text-[#78716C]">
+      <div className="bg-[#141414] border border-white/[0.06] rounded-[28px] p-12 text-center text-xs text-neutral-500">
         No attack graph generated for this session.
       </div>
     );
@@ -20,29 +20,29 @@ export function AttackGraph({ graph, activeFrame }) {
   const nodeMap = new Map(visibleNodes.map((n) => [n.id, n]));
 
   return (
-    <div className="bg-white border border-[#E7E5E4] rounded-xl p-5 overflow-hidden">
-      <div className="flex items-center justify-between mb-4">
+    <div className="bg-[#141414] border border-white/[0.06] rounded-[28px] p-6 overflow-hidden shadow-2xl">
+      <div className="flex items-center justify-between mb-5">
         <div>
-          <h3 className="text-xs font-semibold text-[#1C1917]">Causal Attack Graph</h3>
-          <p className="text-[11px] text-[#78716C]">NetworkX Directed Acyclic Graph (DAG) linking causal progression</p>
+          <h3 className="text-xs font-bold text-white uppercase tracking-wider">Causal Attack Graph</h3>
+          <p className="text-[11px] text-neutral-400 mt-0.5">NetworkX Directed Acyclic Graph (DAG) linking causal progression</p>
         </div>
-        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200">
+        <span className="text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-[#FDE047]/10 text-[#FDE047] border border-[#FDE047]/30">
           NETWORKX ENGINE
         </span>
       </div>
 
-      <div className="w-full overflow-x-auto border border-[#E7E5E4] rounded-lg bg-[#FAFAF9] p-4 min-h-[300px] flex items-center justify-center">
+      <div className="w-full overflow-x-auto border border-white/[0.06] rounded-2xl bg-[#0A0A0A] p-6 min-h-[300px] flex items-center justify-center">
         <svg width="1000" height="260" className="overflow-visible select-none">
           <defs>
             <marker
-              id="arrowhead"
+              id="arrowhead-yellow"
               markerWidth="10"
               markerHeight="7"
               refX="10"
               refY="3.5"
               orient="auto"
             >
-              <polygon points="0 0, 10 3.5, 0 7" fill="#A8A29E" />
+              <polygon points="0 0, 10 3.5, 0 7" fill="#FDE047" />
             </marker>
           </defs>
 
@@ -58,14 +58,15 @@ export function AttackGraph({ graph, activeFrame }) {
                   y1={u.y}
                   x2={v.x - 60}
                   y2={v.y}
-                  stroke="#A8A29E"
-                  strokeWidth="2"
-                  markerEnd="url(#arrowhead)"
+                  stroke="#FDE047"
+                  strokeWidth="1.5"
+                  opacity="0.6"
+                  markerEnd="url(#arrowhead-yellow)"
                 />
                 <text
                   x={(u.x + v.x) / 2}
                   y={(u.y + v.y) / 2 - 8}
-                  fill="#78716C"
+                  fill="#A3A3A3"
                   fontSize="9"
                   fontFamily="monospace"
                   textAnchor="middle"
@@ -80,8 +81,8 @@ export function AttackGraph({ graph, activeFrame }) {
           {visibleNodes.map((node) => {
             const isCritical = node.severity === 'CRITICAL';
             const isHigh = node.severity === 'HIGH';
-            const strokeColor = isCritical ? '#DC2626' : isHigh ? '#D97706' : '#4F46E5';
-            const fillColor = isCritical ? '#FEF2F2' : isHigh ? '#FFFBEB' : '#FFFFFF';
+            const strokeColor = isCritical ? '#EF4444' : isHigh ? '#F59E0B' : '#FDE047';
+            const fillColor = isCritical ? '#260B0E' : isHigh ? '#261C08' : '#171717';
 
             return (
               <g key={node.id} transform={`translate(${node.x}, ${node.y})`}>
@@ -90,18 +91,18 @@ export function AttackGraph({ graph, activeFrame }) {
                   y="-26"
                   width="110"
                   height="52"
-                  rx="8"
+                  rx="14"
                   fill={fillColor}
                   stroke={strokeColor}
                   strokeWidth="1.5"
-                  className="filter drop-shadow-xs"
+                  className="filter drop-shadow-lg"
                 />
                 <text
                   x="0"
                   y="-6"
-                  fill="#1C1917"
+                  fill="#FFFFFF"
                   fontSize="10"
-                  fontWeight="600"
+                  fontWeight="700"
                   textAnchor="middle"
                 >
                   {node.label.length > 14 ? node.label.slice(0, 12) + '..' : node.label}
@@ -109,7 +110,7 @@ export function AttackGraph({ graph, activeFrame }) {
                 <text
                   x="0"
                   y="10"
-                  fill="#78716C"
+                  fill="#A3A3A3"
                   fontSize="8"
                   fontFamily="monospace"
                   textAnchor="middle"

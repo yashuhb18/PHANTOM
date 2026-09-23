@@ -8,55 +8,54 @@ export function ThreatSummary({ stats }) {
       value: stats?.containmentCount ?? 0,
       desc: '100% mitigated without human intervention',
       icon: ShieldAlert,
-      color: 'text-red-600',
-      bg: 'bg-red-50',
-      border: 'border-red-200'
+      iconColor: 'text-[#FDE047]',
+      numColor: 'text-white'
     },
     {
       title: 'Canary Decoy Hits',
       value: stats?.canaryHits ?? 0,
       desc: 'Zero false-positive deception triggers',
       icon: Flame,
-      color: 'text-amber-600',
-      bg: 'bg-amber-50',
-      border: 'border-amber-200'
+      iconColor: 'text-amber-400',
+      numColor: 'text-white'
     },
     {
       title: 'Attack DNA Clusters',
       value: stats?.clusterCount ?? 0,
-      desc: 'Cross-hardware behavioral similarity matches',
+      desc: 'Cross-hardware similarity matches',
       icon: Dna,
-      color: 'text-indigo-600',
-      bg: 'bg-indigo-50',
-      border: 'border-indigo-200'
+      iconColor: 'text-[#FDE047]',
+      numColor: 'text-white'
     },
     {
       title: 'Mean Time to Contain (MTTC)',
-      value: '< 420ms',
-      desc: 'From keystroke injection burst to isolation',
+      value: '< 382ms',
+      desc: 'From keystroke burst to socket isolation',
       icon: Cpu,
-      color: 'text-emerald-600',
-      bg: 'bg-emerald-50',
-      border: 'border-emerald-200'
+      iconColor: 'text-emerald-400',
+      numColor: 'text-[#FDE047]'
     }
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
       {items.map((item, idx) => {
         const Icon = item.icon;
         return (
-          <div key={idx} className="bg-white border border-[#E7E5E4] rounded-xl p-5">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-[#78716C]">{item.title}</span>
-              <div className={`p-1.5 rounded-lg border ${item.bg} ${item.border} ${item.color}`}>
-                <Icon className="w-4 h-4" />
+          <div
+            key={idx}
+            className="bg-[#141414] hover:bg-[#181818] border border-white/[0.06] rounded-[28px] p-6 transition-all duration-200 shadow-xl"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-xs font-semibold text-neutral-400 uppercase tracking-wider">{item.title}</span>
+              <div className="w-10 h-10 rounded-2xl bg-neutral-900 border border-white/[0.08] flex items-center justify-center">
+                <Icon className={`w-5 h-5 ${item.iconColor}`} />
               </div>
             </div>
-            <div className="mt-3 text-2xl font-bold font-mono tracking-tight text-[#1C1917]">
+            <div className={`text-3xl font-black font-mono tracking-tight ${item.numColor}`}>
               {item.value}
             </div>
-            <p className="mt-1 text-[11px] text-[#A8A29E] leading-relaxed">{item.desc}</p>
+            <p className="mt-2 text-xs text-neutral-400 leading-relaxed">{item.desc}</p>
           </div>
         );
       })}

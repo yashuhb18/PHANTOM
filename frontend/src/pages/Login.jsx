@@ -24,10 +24,10 @@ export function Login({ onLoginSuccess }) {
       <div className="max-w-md w-full">
         {/* Brand */}
         <div className="text-center mb-8">
-          <img 
-            src="/logo.png" 
-            alt="PHANTOM" 
-            className="w-14 h-14 rounded-2xl object-contain bg-black p-1 shadow-sm mx-auto mb-3" 
+          <img
+            src="/phantom-logo.png"
+            alt="PHANTOM"
+            className="h-12 w-auto object-contain mx-auto mb-3 select-none"
           />
           <h1 className="text-xl font-bold text-[#1C1917] tracking-tight">PHANTOM Platform</h1>
           <p className="text-xs text-[#78716C] mt-1">Autonomous USB Threat Hunting & Deception</p>

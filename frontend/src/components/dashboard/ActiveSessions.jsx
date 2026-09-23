@@ -1,69 +1,76 @@
 import React from 'react';
-import { Usb, AlertTriangle, ShieldCheck, ArrowRight } from 'lucide-react';
+import { Usb, ArrowRight } from 'lucide-react';
 import { AlertBadge } from '../common/AlertBadge';
 
 export function ActiveSessions({ sessions, onSelectSession }) {
   if (!sessions || sessions.length === 0) {
     return (
-      <div className="bg-white border border-[#E7E5E4] rounded-xl p-6 text-center text-[#78716C]">
-        <Usb className="w-8 h-8 text-[#A8A29E] mx-auto mb-2" />
+      <div className="bg-[#141414] border border-white/[0.06] rounded-[28px] p-8 text-center text-neutral-400">
+        <Usb className="w-8 h-8 text-neutral-600 mx-auto mb-2" />
         <p className="text-xs">No active USB peripheral sessions registered.</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white border border-[#E7E5E4] rounded-xl overflow-hidden">
-      <div className="px-5 py-3.5 border-b border-[#E7E5E4] flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <h3 className="text-xs font-semibold text-[#1C1917]">Monitored USB Sessions</h3>
-          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#F5F5F4] text-[#78716C] border border-[#E7E5E4]">
-            {sessions.length}
-          </span>
+    <div className="bg-[#141414] border border-white/[0.06] rounded-[28px] overflow-hidden shadow-2xl">
+      <div className="px-6 py-4 border-b border-white/[0.06] bg-[#0F0F0F] flex items-center justify-between">
+        <div className="flex items-center gap-2.5">
+          <Usb className="w-4 h-4 text-[#FDE047]" />
+          <h3 className="text-xs font-bold text-white tracking-wide uppercase">Monitored USB Sessions</h3>
         </div>
+        <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-white/[0.04] text-neutral-300 border border-white/[0.08]">
+          {sessions.length} ACTIVE
+        </span>
       </div>
 
-      <div className="divide-y divide-[#E7E5E4]">
+      <div className="divide-y divide-white/[0.04]">
         {sessions.map((sess) => {
           const isCritical = sess.risk_score >= 60;
           return (
             <div
               key={sess.session_id}
               onClick={() => onSelectSession && onSelectSession(sess.session_id)}
-              className="p-4 hover:bg-[#FAFAF9] transition-colors cursor-pointer flex items-center justify-between"
+              className="p-4 px-6 hover:bg-white/[0.02] transition-colors cursor-pointer flex items-center justify-between group"
             >
-              <div className="flex items-center gap-3">
-                <div className={`p-2 rounded-lg border ${isCritical ? 'bg-red-50 border-red-200 text-red-600' : 'bg-[#FAFAF9] border-[#E7E5E4] text-[#78716C]'}`}>
-                  <Usb className="w-4 h-4" />
+              <div className="flex items-center gap-4">
+                <div className={`w-10 h-10 rounded-2xl flex items-center justify-center border ${
+                  isCritical
+                    ? 'bg-red-500/10 border-red-500/25 text-red-400'
+                    : 'bg-neutral-900 border-white/[0.06] text-neutral-300'
+                }`}>
+                  <Usb className="w-5 h-5" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-semibold text-[#1C1917]">{sess.device_name}</span>
-                    <span className="text-[10px] font-mono text-[#78716C] bg-[#F5F5F4] px-1.5 py-0.2 rounded border border-[#E7E5E4]">
+                    <span className="text-xs font-bold text-white tracking-tight">{sess.device_name}</span>
+                    <span className="text-[10px] font-mono text-neutral-400 bg-white/[0.04] px-2 py-0.5 rounded-full border border-white/[0.06]">
                       VID:{sess.vendor_id} PID:{sess.product_id}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className="text-[11px] font-mono text-[#A8A29E]">{sess.session_id}</span>
-                    <span className="text-[11px] text-[#A8A29E]">•</span>
-                    <span className="text-[11px] text-[#78716C]">{sess.inserted_at?.slice(11, 19)} UTC</span>
+                  <div className="flex items-center gap-2 mt-1 text-[11px] text-neutral-400">
+                    <span className="font-mono text-neutral-500">{sess.session_id}</span>
+                    <span>•</span>
+                    <span className="font-mono">{sess.inserted_at?.slice(11, 19)} UTC</span>
                   </div>
                 </div>
               </div>
 
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-5">
                 <div className="text-right">
-                  <div className="flex items-center justify-end gap-1.5">
-                    <span className={`text-xs font-mono font-bold ${isCritical ? 'text-red-600' : 'text-[#1C1917]'}`}>
+                  <div className="flex items-center justify-end gap-2">
+                    <span className={`text-xs font-mono font-bold ${isCritical ? 'text-red-400' : 'text-neutral-300'}`}>
                       {sess.risk_score}/100
                     </span>
                     <AlertBadge severity={isCritical ? 'CRITICAL' : sess.risk_score >= 30 ? 'HIGH' : 'LOW'} />
                   </div>
-                  <span className="text-[10px] font-mono text-[#A8A29E]">
-                    {sess.event_count || 0} events
+                  <span className="text-[10px] font-mono text-neutral-500">
+                    {sess.event_count || 0} events recorded
                   </span>
                 </div>
-                <ArrowRight className="w-4 h-4 text-[#A8A29E]" />
+                <div className="w-8 h-8 rounded-full bg-white/[0.04] group-hover:bg-[#FDE047] text-neutral-400 group-hover:text-black flex items-center justify-center transition-all">
+                  <ArrowRight className="w-4 h-4" />
+                </div>
               </div>
             </div>
           );

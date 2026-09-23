@@ -1,8 +1,8 @@
 import React from 'react';
 import { EventFeed } from '../components/monitor/EventFeed';
 import { NarratorPanel } from '../components/monitor/NarratorPanel';
-import { SimulateButton } from '../components/common/SimulateButton';
 import { useWebSocket } from '../hooks/useWebSocket';
+import { Activity } from 'lucide-react';
 
 export function LiveMonitor() {
   const { liveEvents, narratorMessages, clearEvents } = useWebSocket();
@@ -10,23 +10,29 @@ export function LiveMonitor() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       {/* Live Surveillance Banner */}
-      <div className="bg-white border border-[#E7E5E4] rounded-xl p-4 flex flex-col md:flex-row items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <h2 className="text-xs font-bold text-[#1C1917] tracking-tight">Live Threat Hunting Console</h2>
-            <span className="flex items-center gap-1 text-[9px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              PHYSICAL HARDWARE LISTENER ACTIVE
-            </span>
+      <div className="bg-[#141414] border border-white/[0.08] rounded-[28px] p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-2xl">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-neutral-900 border border-white/[0.08] flex items-center justify-center text-[#FDE047] shrink-0">
+            <Activity className="w-6 h-6" />
           </div>
-          <p className="text-[11px] text-[#78716C] mt-0.5">
-            Observing physical USB insertions, hardware descriptors, keystroke bursts, process spawns, and canary traps in real time.
-          </p>
+          <div>
+            <div className="flex items-center gap-2.5">
+              <h2 className="text-sm font-bold text-white tracking-tight uppercase">Live Threat Hunting Console</h2>
+              <span className="flex items-center gap-1.5 text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                HARDWARE LISTENER ACTIVE
+              </span>
+            </div>
+            <p className="text-xs text-neutral-400 mt-1">
+              Observing physical USB insertions, hardware descriptors, keystroke bursts, process spawns, and canary traps in real time.
+            </p>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
+
+        <div className="flex items-center gap-3">
           <button
             onClick={clearEvents}
-            className="px-3 py-1.5 rounded-lg text-xs font-medium text-[#78716C] hover:text-[#1C1917] hover:bg-[#F5F5F4] border border-[#E7E5E4] transition-colors cursor-pointer"
+            className="px-4 py-2 rounded-full text-xs font-semibold text-neutral-400 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] transition-all cursor-pointer pill-button"
           >
             Clear Telemetry Feed
           </button>

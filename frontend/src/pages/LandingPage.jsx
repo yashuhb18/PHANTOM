@@ -1,26 +1,35 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  ShieldCheck, 
-  Terminal, 
-  ArrowRight, 
-  Activity, 
-  Dna, 
-  Flame, 
-  Lock, 
-  Zap, 
-  CheckCircle2, 
+import {
+  ShieldCheck,
+  Terminal,
+  ArrowRight,
+  Activity,
+  Dna,
+  Flame,
+  Lock,
+  Zap,
+  CheckCircle2,
   ChevronRight,
   ShieldAlert,
   Cpu,
   Layers,
-  GitCommit,
   Radio,
   Clock,
   Sparkles,
   FileText,
   AlertTriangle,
-  Download
+  Download,
+  Play,
+  Pause,
+  RotateCcw,
+  Copy,
+  Check,
+  TrendingUp,
+  Shield,
+  ArrowUpRight,
+  Globe
 } from 'lucide-react';
+import { UsbPhantomAssembly } from '../components/landing/UsbPhantomAssembly';
 
 // Smooth Scroll-Reveal Wrapper using IntersectionObserver
 function Reveal({ children, delay = 0, className = "" }) {
@@ -35,7 +44,7 @@ function Reveal({ children, delay = 0, className = "" }) {
           observer.unobserve(entry.target);
         }
       },
-      { threshold: 0.12 }
+      { threshold: 0.1 }
     );
     if (ref.current) observer.observe(ref.current);
     return () => observer.disconnect();
@@ -46,7 +55,7 @@ function Reveal({ children, delay = 0, className = "" }) {
       ref={ref}
       style={{ transitionDelay: `${delay}ms` }}
       className={`transition-all duration-700 ease-out transform ${
-        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
       } ${className}`}
     >
       {children}
@@ -56,587 +65,672 @@ function Reveal({ children, delay = 0, className = "" }) {
 
 export function LandingPage({ onLaunchConsole }) {
   const [terminalStep, setTerminalStep] = useState(0);
-  const [activeTab, setActiveTab] = useState(0);
+  const [isTerminalPlaying, setIsTerminalPlaying] = useState(true);
+  const [copied, setCopied] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const terminalLogs = [
-    { text: "HARDWARE_ATTACH: VID:03EB PID:2042 (RubberDucky v2.1)", color: "text-[#78716C]" },
-    { text: "ANOMALY: Keystroke injection rate: 890 chars/sec (Superhuman)", color: "text-amber-600" },
-    { text: "PROCESS_EXEC: powershell.exe -NoP -W Hidden -Enc SQBFAFgA...", color: "text-indigo-600" },
-    { text: "CANARY_TRIP: Decoy '.aws_creds_canary' accessed by PID:4120", color: "text-red-600" },
-    { text: "AUTONOMOUS_ACTION: Sockets severed. Host micro-isolated (420ms).", color: "text-emerald-600" },
-    { text: "ATTACK_DNA: Extracted signature #824a-ducky -> Jaccard cataloged.", color: "text-indigo-700" }
+    { t: "00:00.12", lvl: "INFO", src: "RAW-USB", msg: "USB Bus Enumeration: VID_0483&PID_5740 (Class 03: HID Keyboard)" },
+    { t: "00:00.24", lvl: "WARN", src: "KBD-HOOK", msg: "Keystroke burst: 84 WPM -> 760 WPM (Jitter: 0.4ms). Synthetic injection flagged." },
+    { t: "00:00.48", lvl: "WARN", src: "PROC-MON", msg: "Process spawned: powershell.exe -NoP -NonI -W Hidden -Enc SUVY..." },
+    { t: "00:01.02", lvl: "CRIT", src: "CANARY", msg: "DECEPTION TRIPWIRE BREACH: Unauthorized access to .aws/credentials.canary" },
+    { t: "00:01.18", lvl: "KILL", src: "CONTAIN", msg: "AUTONOMOUS ISOLATION TRIGGERED: Outbound TCP socket severed. Host micro-isolated." },
+    { t: "00:01.32", lvl: "INFO", src: "DNA-ENG", msg: "Attack DNA synthesized: #e93b12. Match: 82.4% with known Actor 'APT-COVERT-PERIPHERAL'" }
   ];
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setTerminalStep(prev => (prev < terminalLogs.length ? prev + 1 : 1));
-    }, 1800);
-    return () => clearInterval(timer);
-  }, [terminalLogs.length]);
+    if (!isTerminalPlaying) return;
+    const interval = setInterval(() => {
+      setTerminalStep((prev) => (prev + 1) % terminalLogs.length);
+    }, 2400);
+    return () => clearInterval(interval);
+  }, [isTerminalPlaying, terminalLogs.length]);
 
-  const lifecycleSteps = [
-    {
-      step: "01",
-      title: "Physical Ingress & Descriptor Intercept",
-      time: "T+00:00",
-      icon: Cpu,
-      desc: "Attacker plugs in malicious USB peripheral. Kernel WMI listener intercepts hardware descriptor before the OS finishes mounting the driver.",
-      tag: "WMI / PNP HOOK"
-    },
-    {
-      step: "02",
-      title: "HID Keystroke Anomaly Burst",
-      time: "T+00:42",
-      icon: Zap,
-      desc: "Device mimics a keyboard typing at 890 characters/second. PHANTOM flags synthetic input burst exceeding human biomechanical thresholds.",
-      tag: "HEURISTIC ENGINE"
-    },
-    {
-      step: "03",
-      title: "Canary Honeypot Violation",
-      time: "T+01:15",
-      icon: Flame,
-      desc: "Injected PowerShell payload navigates filesystem and touches bait credentials (.aws_creds_canary). Filesystem watchdog fires instant zero-false-positive alert.",
-      tag: "DECEPTION GRID"
-    },
-    {
-      step: "04",
-      title: "Autonomous Surgical Neutralization",
-      time: "T+01:28",
-      icon: Lock,
-      desc: "Autonomous Response Engine severs outbound network sockets, terminates process trees, and locks hardware descriptor in under 420ms.",
-      tag: "< 420ms RESPONSE"
-    }
-  ];
+  const copyTelemetry = () => {
+    const text = terminalLogs.map(l => `[${l.t}] [${l.src}] ${l.msg}`).join('\n');
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
-    <div className="min-h-screen bg-[#FAFAF9] text-[#1C1917] font-sans antialiased selection:bg-indigo-100 selection:text-indigo-900">
-      {/* 1. Header / Navbar */}
-      <header className="sticky top-0 z-50 bg-[#FAFAF9]/90 backdrop-blur-md border-b border-[#E7E5E4] px-6 lg:px-12 h-16 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <img 
-            src="/logo.png" 
-            alt="PHANTOM" 
-            className="w-8 h-8 rounded-lg object-contain bg-black p-0.5 shadow-xs" 
-          />
-          <span className="font-bold text-base tracking-tight text-[#1C1917]">PHANTOM</span>
-          <span className="hidden sm:inline-block px-2 py-0.5 rounded text-[11px] font-mono bg-[#F5F5F4] text-[#78716C] border border-[#E7E5E4]">
-            AUTONOMOUS DEFENSE
-          </span>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <a
-            href="http://localhost:8001/api/download/app"
-            download
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#E7E5E4] hover:bg-[#F5F5F4] text-xs font-semibold text-[#1C1917] transition-colors"
-          >
-            <Download className="w-3.5 h-3.5 text-indigo-600" />
-            <span className="hidden sm:inline">Download App (.exe)</span>
-            <span className="sm:hidden">.exe</span>
+    <div className="min-h-screen bg-[#0A0A0A] text-white font-sans selection:bg-[#FDE047] selection:text-black">
+      
+      {/* Floating Glassmorphic Navigation Capsule */}
+      <header className="fixed top-3 sm:top-5 inset-x-0 z-50 flex justify-center px-4 sm:px-6 pointer-events-none anim-nav">
+        <div
+          className={`pointer-events-auto w-full max-w-7xl transition-all duration-500 rounded-full flex items-center justify-between px-6 sm:px-8 py-2.5 sm:py-3 ${
+            isScrolled
+              ? 'bg-[#0A0A0A]/85 backdrop-blur-2xl border border-white/15 shadow-[0_12px_40px_rgba(0,0,0,0.7)] text-white'
+              : 'bg-black/5 hover:bg-black/10 backdrop-blur-xl border border-black/10 text-black shadow-md'
+          }`}
+        >
+          <a href="#" className="flex items-center gap-2 cursor-pointer group">
+            <img
+              src={isScrolled ? "/phantom-logo-white.png" : "/phantom-logo.png"}
+              alt="PHANTOM"
+              className="h-8 sm:h-9 md:h-10 w-auto object-contain transition-all duration-300 group-hover:scale-105 select-none"
+            />
           </a>
-          <button
-            onClick={onLaunchConsole}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-xs transition-colors"
-          >
-            <span>Launch Console</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
+
+          <nav className={`hidden md:flex items-center gap-7 text-xs sm:text-sm font-semibold transition-colors ${
+            isScrolled ? 'text-neutral-300' : 'text-black/80'
+          }`}>
+            <a href="#features" className={`transition-colors ${isScrolled ? 'hover:text-[#FDE047]' : 'hover:text-black'}`}>Features</a>
+            <a href="#architecture" className={`transition-colors ${isScrolled ? 'hover:text-[#FDE047]' : 'hover:text-black'}`}>Architecture</a>
+            <a href="#attack-dna" className={`transition-colors ${isScrolled ? 'hover:text-[#FDE047]' : 'hover:text-black'}`}>Attack DNA</a>
+            <a href="#benchmarks" className={`transition-colors ${isScrolled ? 'hover:text-[#FDE047]' : 'hover:text-black'}`}>Benchmarks</a>
+          </nav>
+
+          <div className="flex items-center gap-3">
+            <button
+              onClick={onLaunchConsole}
+              className={`font-bold text-xs sm:text-sm px-4 sm:px-5 py-1.5 sm:py-2 rounded-full pill-button shadow-md flex items-center gap-1.5 sm:gap-2 cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95 ${
+                isScrolled
+                  ? 'bg-[#FDE047] hover:bg-[#FACC15] text-black shadow-[0_0_15px_rgba(253,224,71,0.3)]'
+                  : 'bg-black hover:bg-neutral-900 text-white'
+              }`}
+            >
+              <span>Get Started</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
       </header>
 
-      {/* 2. Hero Section */}
-      <section className="px-6 lg:px-12 pt-16 pb-20 max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          {/* Left Column: Value Proposition */}
-          <div className="lg:col-span-7 space-y-6">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#E7E5E4] bg-white text-xs font-medium text-[#78716C] shadow-xs">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>Autonomous USB Threat Hunting & Deception</span>
+      {/* =========================================================================
+          SECTION 1: THE HERO SECTION (Cyber Yellow #FDE047)
+          Balanced symmetrical curvature at bottom
+          ========================================================================= */}
+      <section className="bg-[#FDE047] text-black relative z-10 rounded-b-[60px] md:rounded-b-[80px] pb-24 md:pb-36 pt-24 sm:pt-28 md:pt-32 px-6 md:px-12 shadow-2xl overflow-hidden">
+
+        {/* Hero Body: 2 Columns */}
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+          
+          {/* Left Column: Massive Headline & Value Proposition */}
+          <div className="lg:col-span-7 flex flex-col items-start text-left">
+            
+            {/* Pill Badge */}
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/10 border border-black/10 text-black text-xs font-bold uppercase tracking-wider mb-6 anim-badge">
+              <span className="w-2 h-2 rounded-full bg-black animate-pulse" />
+              <span>NEXT GEN HARDWARE DEFENSE</span>
             </div>
 
-            <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-[#1C1917] leading-[1.15]">
-              USB attacks don’t wait for analysts. <br />
-              <span className="text-indigo-600">Neither does PHANTOM.</span>
+            {/* Bold Headline */}
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-6xl font-black text-black tracking-tight leading-[0.95] mb-6 anim-title">
+              TRUST NOTHING.<br />
+              PLUG ANYTHING.
             </h1>
 
-            <p className="text-base sm:text-lg text-[#78716C] leading-relaxed max-w-2xl">
-              Traditional EDR misses rapid keystroke injection and physical BadUSB payloads. 
-              PHANTOM deploys filesystem deception traps, extracts behavioral <strong>Attack DNA</strong> across hardware swaps, 
-              and autonomously severs threats in <strong>under 420ms</strong>.
+            {/* Sub-header */}
+            <p className="text-sm sm:text-base md:text-lg text-black/85 font-medium leading-relaxed max-w-xl mb-10 anim-desc">
+              PHANTOM automatically detects and neutralizes USB-based threats the
+              moment a device is plugged in — no manual intervention needed.
+              From rogue keyboards to data-stealing implants, every attack is
+              identified, isolated, and reported in under a second.
             </p>
 
-            <div className="flex flex-wrap items-center gap-4 pt-2">
+            {/* Pill CTA Buttons */}
+            <div className="flex flex-wrap items-center gap-4 mb-12 anim-buttons">
               <button
                 onClick={onLaunchConsole}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold shadow-sm transition-all"
+                className="bg-black hover:bg-neutral-900 text-white font-bold text-base px-8 py-4 rounded-full pill-button shadow-xl flex items-center gap-2.5 cursor-pointer"
               >
-                <span>Enter Live Platform</span>
-                <ChevronRight className="w-4 h-4" />
+                <span>Open Console</span>
+                <ArrowRight className="w-5 h-5" />
               </button>
+
               <a
-                href="http://localhost:8001/api/download/app"
-                download
-                className="flex items-center gap-2 px-5 py-2.5 rounded-lg border border-[#E7E5E4] bg-white hover:bg-[#F5F5F4] text-sm font-semibold text-[#1C1917] shadow-xs transition-all"
+                href="#demo"
+                className="bg-transparent hover:bg-black/5 text-black font-bold text-base px-8 py-4 rounded-full border-2 border-black/20 hover:border-black/40 pill-button transition-all inline-flex items-center gap-2"
               >
-                <Download className="w-4 h-4 text-indigo-600" />
-                <span>Download App (.exe)</span>
+                <span>View Demo</span>
               </a>
             </div>
 
-            {/* Micro proof badges */}
-            <div className="pt-4 flex flex-wrap gap-6 text-xs text-[#78716C] border-t border-[#E7E5E4]">
-              <div className="flex items-center gap-1.5">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                <span>Zero-False-Positive Honeypots</span>
+            {/* Trust Badges & Avatars */}
+            <div className="flex items-center gap-4 pt-2 border-t border-black/10 w-full max-w-md anim-trust">
+              <div className="flex -space-x-2">
+                <div className="w-10 h-10 rounded-full bg-black text-[#FDE047] font-bold text-xs flex items-center justify-center ring-2 ring-[#FDE047]">
+                  CISO
+                </div>
+                <div className="w-10 h-10 rounded-full bg-neutral-900 text-white font-bold text-xs flex items-center justify-center ring-2 ring-[#FDE047]">
+                  SOC
+                </div>
+                <div className="w-10 h-10 rounded-full bg-neutral-800 text-white font-bold text-xs flex items-center justify-center ring-2 ring-[#FDE047]">
+                  EDR
+                </div>
               </div>
-              <div className="flex items-center gap-1.5">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                <span>Jaccard Attack DNA Correlation</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                <span>Time-Travel Attack Replay</span>
+              <div>
+                <span className="text-sm font-black text-black block leading-none">2M+ Devices Protected</span>
+                <span className="text-xs font-semibold text-black/70">82.4% Attack DNA Match • 0% FP</span>
               </div>
             </div>
+
           </div>
 
-          {/* Right Column: Live Terminal Simulation */}
-          <div className="lg:col-span-5">
-            <div className="bg-white border border-[#E7E5E4] rounded-2xl shadow-sm overflow-hidden">
-              <div className="px-4 py-3 border-b border-[#E7E5E4] bg-[#FAFAF9] flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-2.5 h-2.5 rounded-full bg-red-400" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-amber-400" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
-                  <span className="ml-2 text-xs font-mono font-medium text-[#78716C]">phantom-agent.log</span>
+          {/* Right Column: Dynamic 20x USB Sentinel PHANTOM Assembly */}
+          <div className="lg:col-span-5 relative flex justify-center lg:justify-end anim-card">
+            <UsbPhantomAssembly />
+          </div>
+
+        </div>
+
+      </section>
+
+
+      {/* =========================================================================
+          SECTION 2: THE DARK VOID (Deep Onyx #0A0A0A)
+          Matching Screenshot 2: Features, Massive Headline, Charcoal Rounded Cards
+          ========================================================================= */}
+      <section id="features" className="bg-[#0A0A0A] py-24 md:py-36 px-6 md:px-12 relative">
+        
+        {/* Tech Stack Horizontal Moving Marquee */}
+        <div className="max-w-7xl mx-auto mb-20 pb-12 border-b border-white/[0.06]">
+          <span className="text-xs font-mono text-neutral-500 uppercase tracking-widest block text-center mb-8">
+            ENTERPRISE KERNEL DEFENSE INFRASTRUCTURE
+          </span>
+
+          {/* Horizontal Moving Marquee Container */}
+          <div className="relative overflow-hidden w-full py-2">
+            {/* Left Fade Mask */}
+            <div className="absolute left-0 inset-y-0 w-16 sm:w-28 md:w-36 bg-gradient-to-r from-[#0A0A0A] to-transparent z-10 pointer-events-none" />
+            {/* Right Fade Mask */}
+            <div className="absolute right-0 inset-y-0 w-16 sm:w-28 md:w-36 bg-gradient-to-l from-[#0A0A0A] to-transparent z-10 pointer-events-none" />
+
+            {/* Continuous Horizontal Ticker */}
+            <div className="animate-marquee-horizontal flex items-center select-none">
+              {[
+                "KERNEL-HOOK (WH_KEYBOARD_LL)",
+                "RAW-USB (SETUPAPI)",
+                "NETWORKX CAUSAL-DAG",
+                "JACCARD-DNA MATRIX",
+                "CANARY KERNEL-WATCHDOG",
+                "AUTONOMOUS MICRO-ISOLATION",
+                "KERNEL-HOOK (WH_KEYBOARD_LL)",
+                "RAW-USB (SETUPAPI)",
+                "NETWORKX CAUSAL-DAG",
+                "JACCARD-DNA MATRIX",
+                "CANARY KERNEL-WATCHDOG",
+                "AUTONOMOUS MICRO-ISOLATION"
+              ].map((item, idx) => (
+                <div
+                  key={idx}
+                  className="flex items-center mx-6 sm:mx-8 md:mx-10 font-mono text-base sm:text-lg md:text-xl font-bold uppercase tracking-[0.2em] text-neutral-400 hover:text-[#FDE047] transition-colors duration-200 cursor-default whitespace-nowrap"
+                >
+                  <span>{item}</span>
+                  <span className="ml-12 md:ml-16 text-neutral-700 font-light select-none">/</span>
                 </div>
-                <span className="text-[10px] font-mono text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 font-semibold">
-                  LIVE INTERCEPT
-                </span>
-              </div>
-
-              <div className="p-4 font-mono text-xs space-y-2.5 min-h-[260px] bg-[#FFFFFF]">
-                {terminalLogs.slice(0, terminalStep).map((log, i) => (
-                  <div key={i} className={`flex items-start gap-2 ${log.color} leading-relaxed animate-fade-in`}>
-                    <span className="text-[#A8A29E] select-none text-[10px] pt-0.5">[{`00:${i * 2 + 10}`}]</span>
-                    <span className="break-all">{log.text}</span>
-                  </div>
-                ))}
-                {terminalStep < terminalLogs.length && (
-                  <div className="flex items-center gap-1 text-[#A8A29E] text-[11px]">
-                    <span className="inline-block w-1.5 h-3 bg-indigo-600 animate-pulse" />
-                    <span>intercepting kernel events...</span>
-                  </div>
-                )}
-              </div>
-
-              <div className="px-4 py-2.5 bg-[#FAFAF9] border-t border-[#E7E5E4] flex items-center justify-between text-[11px] font-mono text-[#78716C]">
-                <span>Kernel Hook: ACTIVE</span>
-                <span>Containment: ARMED</span>
-              </div>
+              ))}
             </div>
           </div>
         </div>
+
+        {/* Section Header (Matching Screenshot 2) */}
+        <div className="max-w-7xl mx-auto mb-16">
+          <Reveal>
+            <span className="text-[#FDE047] font-bold text-xs md:text-sm tracking-widest uppercase mb-4 block">
+              FEATURES
+            </span>
+            <h2 className="text-5xl sm:text-6xl md:text-7xl font-bold text-white tracking-tight leading-[1.05] max-w-3xl">
+              Everything you need.<br />
+              Nothing you don't.
+            </h2>
+          </Reveal>
+        </div>
+
+        {/* Features Card Grid (Matching Screenshot 2: Large Rounded Charcoal Cards with Yellow Icons) */}
+        {/* Features Card Grid */}
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
+          
+          {/* Feature 1 */}
+          <Reveal delay={100}>
+            <div className="bg-[#141414] hover:bg-[#FDE047] border border-white/[0.06] hover:border-[#FDE047] p-6 sm:p-7 rounded-[24px] relative group transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-[0_16px_36px_rgba(253,224,71,0.22)] h-full flex flex-col justify-between cursor-pointer">
+              <div>
+                <div className="w-11 h-11 rounded-xl bg-neutral-900 border border-white/[0.08] text-[#FDE047] group-hover:bg-black group-hover:text-[#FDE047] flex items-center justify-center mb-4 transition-colors shadow-sm">
+                  <Activity className="w-5 h-5" />
+                </div>
+                <h3 className="text-lg sm:text-xl font-bold text-white group-hover:text-black mb-2.5 tracking-tight transition-colors">
+                  Instant Rogue Device Detection
+                </h3>
+                <p className="text-xs sm:text-sm text-neutral-400 group-hover:text-black/85 leading-relaxed transition-colors">
+                  Catches fake keyboards, RubberDuckies, and rogue USB injectors the millisecond they plug in — stopping hardware attacks before any malicious code can execute.
+                </p>
+              </div>
+              <div className="mt-6 flex justify-end">
+                <div className="w-8 h-8 rounded-full bg-[#FDE047]/10 text-[#FDE047] group-hover:bg-black group-hover:text-[#FDE047] flex items-center justify-center transition-all">
+                  <ArrowUpRight className="w-4 h-4" />
+                </div>
+              </div>
+            </div>
+          </Reveal>
+
+          {/* Feature 2 */}
+          <Reveal delay={200}>
+            <div className="bg-[#141414] hover:bg-[#FDE047] border border-white/[0.06] hover:border-[#FDE047] p-6 sm:p-7 rounded-[24px] relative group transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-[0_16px_36px_rgba(253,224,71,0.22)] h-full flex flex-col justify-between cursor-pointer">
+              <div>
+                <div className="w-11 h-11 rounded-xl bg-neutral-900 border border-white/[0.08] text-[#FDE047] group-hover:bg-black group-hover:text-[#FDE047] flex items-center justify-center mb-4 transition-colors shadow-sm">
+                  <Globe className="w-5 h-5" />
+                </div>
+                <h3 className="text-lg sm:text-xl font-bold text-white group-hover:text-black mb-2.5 tracking-tight transition-colors">
+                  Live Visual Attack Map
+                </h3>
+                <p className="text-xs sm:text-sm text-neutral-400 group-hover:text-black/85 leading-relaxed transition-colors">
+                  Traces the full journey of a threat from physical USB insertion to network connections and file access, giving you an interactive, real-time visual map.
+                </p>
+              </div>
+              <div className="mt-6 flex justify-end">
+                <div className="w-8 h-8 rounded-full bg-[#FDE047]/10 text-[#FDE047] group-hover:bg-black group-hover:text-[#FDE047] flex items-center justify-center transition-all">
+                  <ArrowUpRight className="w-4 h-4" />
+                </div>
+              </div>
+            </div>
+          </Reveal>
+
+          {/* Feature 3 */}
+          <Reveal delay={300}>
+            <div className="bg-[#141414] hover:bg-[#FDE047] border border-white/[0.06] hover:border-[#FDE047] p-6 sm:p-7 rounded-[24px] relative group transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-[0_16px_36px_rgba(253,224,71,0.22)] h-full flex flex-col justify-between cursor-pointer">
+              <div>
+                <div className="w-11 h-11 rounded-xl bg-neutral-900 border border-white/[0.08] text-[#FDE047] group-hover:bg-black group-hover:text-[#FDE047] flex items-center justify-center mb-4 transition-colors shadow-sm">
+                  <Dna className="w-5 h-5" />
+                </div>
+                <h3 className="text-lg sm:text-xl font-bold text-white group-hover:text-black mb-2.5 tracking-tight transition-colors">
+                  Attacker DNA Fingerprinting
+                </h3>
+                <p className="text-xs sm:text-sm text-neutral-400 group-hover:text-black/85 leading-relaxed transition-colors">
+                  Recognizes repeat threat actors by their unique behavioral signature with 82%+ accuracy, spotting them even if they plug in a completely different flash drive.
+                </p>
+              </div>
+              <div className="mt-6 flex justify-end">
+                <div className="w-8 h-8 rounded-full bg-[#FDE047]/10 text-[#FDE047] group-hover:bg-black group-hover:text-[#FDE047] flex items-center justify-center transition-all">
+                  <ArrowUpRight className="w-4 h-4" />
+                </div>
+              </div>
+            </div>
+          </Reveal>
+
+          {/* Feature 4 */}
+          <Reveal delay={400}>
+            <div className="bg-[#141414] hover:bg-[#FDE047] border border-white/[0.06] hover:border-[#FDE047] p-6 sm:p-7 rounded-[24px] relative group transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-[0_16px_36px_rgba(253,224,71,0.22)] h-full flex flex-col justify-between cursor-pointer">
+              <div>
+                <div className="w-11 h-11 rounded-xl bg-neutral-900 border border-white/[0.08] text-[#FDE047] group-hover:bg-black group-hover:text-[#FDE047] flex items-center justify-center mb-4 transition-colors shadow-sm">
+                  <Flame className="w-5 h-5" />
+                </div>
+                <h3 className="text-lg sm:text-xl font-bold text-white group-hover:text-black mb-2.5 tracking-tight transition-colors">
+                  Smart Decoy Traps
+                </h3>
+                <p className="text-xs sm:text-sm text-neutral-400 group-hover:text-black/85 leading-relaxed transition-colors">
+                  Deploys invisible honeypot files like fake passwords and server keys. The second an intruder opens bait, alarms sound with 100% certainty and zero false alarms.
+                </p>
+              </div>
+              <div className="mt-6 flex justify-end">
+                <div className="w-8 h-8 rounded-full bg-[#FDE047]/10 text-[#FDE047] group-hover:bg-black group-hover:text-[#FDE047] flex items-center justify-center transition-all">
+                  <ArrowUpRight className="w-4 h-4" />
+                </div>
+              </div>
+            </div>
+          </Reveal>
+
+          {/* Feature 5 */}
+          <Reveal delay={500}>
+            <div className="bg-[#141414] hover:bg-[#FDE047] border border-white/[0.06] hover:border-[#FDE047] p-6 sm:p-7 rounded-[24px] relative group transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-[0_16px_36px_rgba(253,224,71,0.22)] h-full flex flex-col justify-between cursor-pointer">
+              <div>
+                <div className="w-11 h-11 rounded-xl bg-neutral-900 border border-white/[0.08] text-[#FDE047] group-hover:bg-black group-hover:text-[#FDE047] flex items-center justify-center mb-4 transition-colors shadow-sm">
+                  <Zap className="w-5 h-5" />
+                </div>
+                <h3 className="text-lg sm:text-xl font-bold text-white group-hover:text-black mb-2.5 tracking-tight transition-colors">
+                  Sub-Second Auto-Isolation
+                </h3>
+                <p className="text-xs sm:text-sm text-neutral-400 group-hover:text-black/85 leading-relaxed transition-colors">
+                  Instantly severs rogue connections and locks down compromised USB ports in under 382 milliseconds — neutralizing the danger without disrupting your normal work.
+                </p>
+              </div>
+              <div className="mt-6 flex justify-end">
+                <div className="w-8 h-8 rounded-full bg-[#FDE047]/10 text-[#FDE047] group-hover:bg-black group-hover:text-[#FDE047] flex items-center justify-center transition-all">
+                  <ArrowUpRight className="w-4 h-4" />
+                </div>
+              </div>
+            </div>
+          </Reveal>
+
+          {/* Feature 6 */}
+          <Reveal delay={600}>
+            <div className="bg-[#141414] hover:bg-[#FDE047] border border-white/[0.06] hover:border-[#FDE047] p-6 sm:p-7 rounded-[24px] relative group transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-[0_16px_36px_rgba(253,224,71,0.22)] h-full flex flex-col justify-between cursor-pointer">
+              <div>
+                <div className="w-11 h-11 rounded-xl bg-neutral-900 border border-white/[0.08] text-[#FDE047] group-hover:bg-black group-hover:text-[#FDE047] flex items-center justify-center mb-4 transition-colors shadow-sm">
+                  <FileText className="w-5 h-5" />
+                </div>
+                <h3 className="text-lg sm:text-xl font-bold text-white group-hover:text-black mb-2.5 tracking-tight transition-colors">
+                  Executive Audit Reports
+                </h3>
+                <p className="text-xs sm:text-sm text-neutral-400 group-hover:text-black/85 leading-relaxed transition-colors">
+                  Automatically compiles boardroom-ready incident summaries with second-by-second timelines and compliance mappings, downloadable with a single click.
+                </p>
+              </div>
+              <div className="mt-6 flex justify-end">
+                <div className="w-8 h-8 rounded-full bg-[#FDE047]/10 text-[#FDE047] group-hover:bg-black group-hover:text-[#FDE047] flex items-center justify-center transition-all">
+                  <ArrowUpRight className="w-4 h-4" />
+                </div>
+              </div>
+            </div>
+          </Reveal>
+
+        </div>
+
       </section>
 
-      {/* 3. Section: The Blind Spot (Why Traditional EDR Fails) */}
-      <section className="px-6 lg:px-12 py-20 bg-white border-y border-[#E7E5E4]">
-        <div className="max-w-7xl mx-auto space-y-12">
+
+      {/* =========================================================================
+          SECTION 3: EDR BLIND SPOT COMPARISON (High-Contrast Void)
+          ========================================================================= */}
+      <section className="bg-[#0A0A0A] py-20 px-6 md:px-12 border-t border-white/[0.06]">
+        <div className="max-w-7xl mx-auto">
+          
           <Reveal>
-            <div className="text-center max-w-3xl mx-auto space-y-3">
-              <span className="text-xs font-mono font-bold text-indigo-600 tracking-wider uppercase">
-                THE PHYSICAL ATTACK VECTOR
+            <div className="text-center max-w-2xl mx-auto mb-16">
+              <span className="text-[#FDE047] font-bold text-xs tracking-widest uppercase mb-2 block">
+                THE PHYSICAL BLIND SPOT
               </span>
-              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#1C1917]">
-                Why enterprise EDR fails at the USB boundary
+              <h2 className="text-4xl md:text-5xl font-bold text-white tracking-tight">
+                Why Traditional EDR Fails Against Rogue Hardware
               </h2>
-              <p className="text-sm sm:text-base text-[#78716C] leading-relaxed">
-                Legacy endpoint tools are blind to hardware-level deception. BadUSB devices bypass driver firewalls by emulating standard keyboards.
-              </p>
             </div>
           </Reveal>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            
+            {/* Traditional EDR Card */}
             <Reveal delay={100}>
-              <div className="p-8 rounded-2xl border border-red-200 bg-red-50/30 space-y-4 relative overflow-hidden">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-mono font-bold text-red-700 uppercase tracking-wide">
-                    TRADITIONAL EDR / ANTIVIRUS
-                  </span>
-                  <AlertTriangle className="w-5 h-5 text-red-500" />
+              <div className="bg-[#141414] border border-white/[0.06] rounded-[28px] p-8">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-2.5 rounded-xl bg-red-500/10 text-red-400 border border-red-500/20">
+                    <AlertTriangle className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-white">Conventional EDR / XDR</h3>
+                    <p className="text-xs text-neutral-400">CrowdStrike, SentinelOne, Defender ATP</p>
+                  </div>
                 </div>
-                <h3 className="text-xl font-bold text-[#1C1917]">Implicit Trust in HID Peripherals</h3>
-                <ul className="space-y-3 text-xs text-[#44403C] leading-relaxed">
-                  <li className="flex items-start gap-2">
-                    <span className="text-red-500 font-bold shrink-0">✕</span>
-                    <span><strong>Treats keystrokes as human:</strong> Any device advertising as a keyboard is trusted by Windows, allowing 900 chars/sec script injection.</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-red-500 font-bold shrink-0">✕</span>
-                    <span><strong>Static blocklists fail:</strong> Attackers alter VID/PID in seconds or clone legitimate Dell/Logitech hardware IDs.</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-red-500 font-bold shrink-0">✕</span>
-                    <span><strong>30–60 minute MTTR:</strong> Alerts are queued to a human SOC analyst while data exfiltration completes in 4 seconds.</span>
-                  </li>
-                </ul>
+
+                <div className="space-y-4 text-sm text-neutral-300">
+                  <div className="flex items-start gap-3 p-3 bg-neutral-900/60 rounded-xl border border-white/[0.04]">
+                    <span className="text-red-400 font-bold">✕</span>
+                    <span><strong>Blind to Keystroke Speed:</strong> Assumes all keyboard input is an authorized human typing at the keyboard.</span>
+                  </div>
+                  <div className="flex items-start gap-3 p-3 bg-neutral-900/60 rounded-xl border border-white/[0.04]">
+                    <span className="text-red-400 font-bold">✕</span>
+                    <span><strong>No Cross-Hardware DNA:</strong> Cannot identify the same attacker when they swap physical USB sticks.</span>
+                  </div>
+                  <div className="flex items-start gap-3 p-3 bg-neutral-900/60 rounded-xl border border-white/[0.04]">
+                    <span className="text-red-400 font-bold">✕</span>
+                    <span><strong>Passive Post-Breach Alerting:</strong> Triggers alerts minutes or hours after data exfiltration has occurred.</span>
+                  </div>
+                </div>
               </div>
             </Reveal>
 
+            {/* PHANTOM Autonomous Card */}
             <Reveal delay={200}>
-              <div className="p-8 rounded-2xl border border-indigo-200 bg-indigo-50/30 space-y-4 relative overflow-hidden">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-mono font-bold text-indigo-700 uppercase tracking-wide">
-                    PHANTOM DEFENSE PLATFORM
-                  </span>
-                  <ShieldCheck className="w-5 h-5 text-indigo-600" />
-                </div>
-                <h3 className="text-xl font-bold text-[#1C1917]">Autonomous Heuristics & Deception</h3>
-                <ul className="space-y-3 text-xs text-[#1E1B4B] leading-relaxed">
-                  <li className="flex items-start gap-2">
-                    <span className="text-indigo-600 font-bold shrink-0">✓</span>
-                    <span><strong>Biomechanical verification:</strong> Flags inhuman typing velocity (&gt;120 cps) and hidden PowerShell stagers instantly.</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-indigo-600 font-bold shrink-0">✓</span>
-                    <span><strong>Canary Deception Grid:</strong> Zero-false-positive lure files catch attackers before data reaches primary storage.</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-indigo-600 font-bold shrink-0">✓</span>
-                    <span><strong>Sub-420ms Surgical Isolation:</strong> Severs network sockets and terminates process trees autonomously without waiting for human triage.</span>
-                  </li>
-                </ul>
-              </div>
-            </Reveal>
-          </div>
-        </div>
-      </section>
+              <div className="bg-[#141414] border-2 border-[#FDE047]/30 rounded-[28px] p-8 shadow-2xl relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-[#FDE047]/10 rounded-full blur-2xl pointer-events-none" />
 
-      {/* 4. Section: The 5 Core Engines (Architecture Deep-Dive) */}
-      <section className="px-6 lg:px-12 py-20 max-w-7xl mx-auto space-y-12">
-        <Reveal>
-          <div className="text-center max-w-2xl mx-auto space-y-3">
-            <span className="text-xs font-mono font-bold text-indigo-600 tracking-wider uppercase">
-              TECHNICAL ARCHITECTURE
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#1C1917]">
-              Five specialized engines in one autonomous pipeline
-            </h2>
-            <p className="text-sm text-[#78716C]">
-              Engineered with clean separation of concerns, swappable agent schemas, and low-latency correlation.
-            </p>
-          </div>
-        </Reveal>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <Reveal delay={100}>
-            <div className="p-6 rounded-2xl bg-white border border-[#E7E5E4] hover:border-indigo-300 transition-all space-y-3 h-full">
-              <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-700">
-                <Flame className="w-5 h-5" />
-              </div>
-              <h3 className="text-base font-bold text-[#1C1917]">1. Canary Deception Grid</h3>
-              <p className="text-xs text-[#78716C] leading-relaxed">
-                Deploys physical decoy tokens (<code className="font-mono text-amber-800">.aws_creds_canary</code>, <code className="font-mono text-amber-800">passwords_2026.xlsx</code>) monitored by OS kernel <code className="font-mono">watchdog</code>. Zero false positives.
-              </p>
-              <div className="pt-2 text-[10px] font-mono text-amber-700 font-semibold">
-                KERNEL WATCHDOG • 0% FALSE POSITIVE
-              </div>
-            </div>
-          </Reveal>
-
-          <Reveal delay={150}>
-            <div className="p-6 rounded-2xl bg-white border border-[#E7E5E4] hover:border-indigo-300 transition-all space-y-3 h-full">
-              <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-700">
-                <Dna className="w-5 h-5" />
-              </div>
-              <h3 className="text-base font-bold text-[#1C1917]">2. Attack DNA Fingerprinting</h3>
-              <p className="text-xs text-[#78716C] leading-relaxed">
-                Extracts behavioral execution tokens and computes real <strong>Jaccard graph similarity</strong>. Recognizes threat actors across physical USB hardware swaps in milliseconds.
-              </p>
-              <div className="pt-2 text-[10px] font-mono text-indigo-700 font-semibold">
-                JACCARD SIMILARITY • CROSS-DEVICE MATCH
-              </div>
-            </div>
-          </Reveal>
-
-          <Reveal delay={200}>
-            <div className="p-6 rounded-2xl bg-white border border-[#E7E5E4] hover:border-indigo-300 transition-all space-y-3 h-full">
-              <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700">
-                <GitCommit className="w-5 h-5" />
-              </div>
-              <h3 className="text-base font-bold text-[#1C1917]">3. Causal Attack Graph</h3>
-              <p className="text-xs text-[#78716C] leading-relaxed">
-                Constructs a directed acyclic graph (DAG) via <strong>NetworkX</strong> linking USB insertion $\rightarrow$ Keystroke $\rightarrow$ PowerShell $\rightarrow$ Canary Trip with visual SVG coordinates.
-              </p>
-              <div className="pt-2 text-[10px] font-mono text-emerald-700 font-semibold">
-                NETWORKX DAG • TEMPORAL LINKING
-              </div>
-            </div>
-          </Reveal>
-
-          <Reveal delay={250}>
-            <div className="p-6 rounded-2xl bg-white border border-[#E7E5E4] hover:border-indigo-300 transition-all space-y-3 h-full">
-              <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-700">
-                <Clock className="w-5 h-5" />
-              </div>
-              <h3 className="text-base font-bold text-[#1C1917]">4. Time-Travel Replay Engine</h3>
-              <p className="text-xs text-[#78716C] leading-relaxed">
-                Stores state snapshots for audio-style video scrubbing. Analysts can drag the scrubber back and forth to inspect exact incident frames and risk escalation.
-              </p>
-              <div className="pt-2 text-[10px] font-mono text-blue-700 font-semibold">
-                AUDIO-STYLE SCRUBBER • FRAME SNAPSHOTS
-              </div>
-            </div>
-          </Reveal>
-
-          <Reveal delay={300}>
-            <div className="p-6 rounded-2xl bg-white border border-[#E7E5E4] hover:border-indigo-300 transition-all space-y-3 h-full">
-              <div className="w-10 h-10 rounded-xl bg-purple-50 border border-purple-200 flex items-center justify-center text-purple-700">
-                <Sparkles className="w-5 h-5" />
-              </div>
-              <h3 className="text-base font-bold text-[#1C1917]">5. AI Threat Narrator & Reports</h3>
-              <p className="text-xs text-[#78716C] leading-relaxed">
-                Streams real-time natural language commentary over WebSockets (<code className="font-mono">/ws/narrator</code>) and compiles executive forensic reports with MITRE ATT&CK mappings.
-              </p>
-              <div className="pt-2 text-[10px] font-mono text-purple-700 font-semibold">
-                WEBSOCKETS • MITRE ATT&CK MAPPING
-              </div>
-            </div>
-          </Reveal>
-
-          <Reveal delay={350}>
-            <div className="p-6 rounded-2xl bg-white border border-[#E7E5E4] hover:border-indigo-300 transition-all space-y-3 h-full">
-              <div className="w-10 h-10 rounded-xl bg-red-50 border border-red-200 flex items-center justify-center text-red-700">
-                <Lock className="w-5 h-5" />
-              </div>
-              <h3 className="text-base font-bold text-[#1C1917]">Autonomous Containment</h3>
-              <p className="text-xs text-[#78716C] leading-relaxed">
-                Executes surgical socket severance and host micro-isolation in &lt;420ms without cutting telemetry. Permanently blacklists malicious peripheral descriptors.
-              </p>
-              <div className="pt-2 text-[10px] font-mono text-red-700 font-semibold">
-                &lt; 420ms MTTC • SOCKET SEVERANCE
-              </div>
-            </div>
-          </Reveal>
-        </div>
-      </section>
-
-      {/* 5. Section: Live Attack Lifecycle Walkthrough */}
-      <section className="px-6 lg:px-12 py-20 bg-white border-y border-[#E7E5E4]">
-        <div className="max-w-7xl mx-auto space-y-12">
-          <Reveal>
-            <div className="text-center max-w-2xl mx-auto space-y-3">
-              <span className="text-xs font-mono font-bold text-indigo-600 tracking-wider uppercase">
-                ATTACK LIFECYCLE
-              </span>
-              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#1C1917]">
-                From physical insertion to autonomous isolation
-              </h2>
-              <p className="text-sm text-[#78716C]">
-                Watch how PHANTOM intercepts, correlates, and kills the attack sequence in sub-second time.
-              </p>
-            </div>
-          </Reveal>
-
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            {lifecycleSteps.map((s, idx) => {
-              const Icon = s.icon;
-              return (
-                <Reveal key={idx} delay={idx * 100}>
-                  <div className="p-6 rounded-2xl border border-[#E7E5E4] bg-[#FAFAF9] hover:bg-white hover:border-indigo-300 transition-all space-y-3 h-full flex flex-col justify-between">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 rounded-xl bg-[#FDE047] text-black">
+                      <ShieldCheck className="w-5 h-5" />
+                    </div>
                     <div>
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="text-xs font-mono font-bold text-indigo-600">{s.time}</span>
-                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white border border-[#E7E5E4] text-[#78716C] font-semibold">
-                          STEP {s.step}
-                        </span>
-                      </div>
-                      <div className="p-2.5 rounded-xl bg-white border border-[#E7E5E4] w-fit text-[#1C1917] mb-3">
-                        <Icon className="w-5 h-5" />
-                      </div>
-                      <h4 className="text-sm font-bold text-[#1C1917] mb-2">{s.title}</h4>
-                      <p className="text-xs text-[#78716C] leading-relaxed">{s.desc}</p>
-                    </div>
-                    <div className="pt-4 border-t border-[#E7E5E4]">
-                      <span className="text-[10px] font-mono text-indigo-700 font-semibold">{s.tag}</span>
+                      <h3 className="text-lg font-bold text-white">PHANTOM Autonomous Defense</h3>
+                      <p className="text-xs text-[#FDE047]">Real-Time Hardware Zero-Day Engine</p>
                     </div>
                   </div>
-                </Reveal>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* 6. Section: Attack DNA Cross-Device Match Proof Card */}
-      <section className="px-6 lg:px-12 py-20 max-w-7xl mx-auto space-y-12">
-        <Reveal>
-          <div className="text-center max-w-2xl mx-auto space-y-3">
-            <span className="text-xs font-mono font-bold text-indigo-600 tracking-wider uppercase">
-              THE KILLER DIFFERENTIATOR
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#1C1917]">
-              Attack DNA: Beating hardware spoofing with behavioral Jaccard graph similarity
-            </h2>
-            <p className="text-sm text-[#78716C]">
-              Attackers change physical USBs to bypass serial filters. PHANTOM matches their behavioral DNA regardless of VID/PID.
-            </p>
-          </div>
-        </Reveal>
-
-        <Reveal delay={150}>
-          <div className="p-8 rounded-2xl bg-white border border-[#E7E5E4] shadow-xs">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-              {/* Left Column: Device Comparison */}
-              <div className="lg:col-span-8 space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="p-4 rounded-xl bg-[#FAFAF9] border border-[#E7E5E4]">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-bold text-[#1C1917]">USB Device #1 (RubberDucky)</span>
-                      <span className="text-[10px] font-mono bg-white px-1.5 py-0.2 rounded border border-[#E7E5E4]">VID: 03EB</span>
-                    </div>
-                    <p className="text-[11px] text-[#78716C] leading-relaxed">
-                      Initial attack payload delivering hidden PowerShell stager and credential discovery.
-                    </p>
-                  </div>
-
-                  <div className="p-4 rounded-xl bg-[#FAFAF9] border border-[#E7E5E4]">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-bold text-[#1C1917]">USB Device #2 (BashBunny)</span>
-                      <span className="text-[10px] font-mono bg-white px-1.5 py-0.2 rounded border border-[#E7E5E4]">VID: 1FC9</span>
-                    </div>
-                    <p className="text-[11px] text-[#78716C] leading-relaxed">
-                      Different physical peripheral, same toolset and behavioral sequence.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Shared Tokens */}
-                <div>
-                  <span className="text-[11px] font-semibold text-emerald-800 block mb-2">
-                    Identified Common Behavioral Subgraphs (Jaccard Match):
+                  <span className="text-[10px] font-mono px-2.5 py-1 rounded-full bg-[#FDE047] text-black font-extrabold uppercase">
+                    SUB-SECOND
                   </span>
-                  <div className="flex flex-wrap gap-1.5">
-                    {["VECTOR:HID_KEYSTROKE_INJECTION", "EXEC:POWERSHELL_PAYLOAD", "DECEPTION:CANARY_FILE_TOUCHED", "TARGET:CLOUD_CREDENTIALS", "EVASION:HIDDEN_WINDOW"].map((t, idx) => (
-                      <span key={idx} className="px-2 py-1 rounded text-[10px] font-mono bg-emerald-50 text-emerald-800 border border-emerald-200 font-medium">
-                        {t}
-                      </span>
-                    ))}
+                </div>
+
+                <div className="space-y-4 text-sm text-neutral-200">
+                  <div className="flex items-start gap-3 p-3 bg-neutral-900/80 rounded-xl border border-white/[0.06]">
+                    <CheckCircle2 className="w-5 h-5 text-[#FDE047] shrink-0" />
+                    <span><strong>Sub-Millisecond Jitter Detection:</strong> Spots non-human typing cadence in &lt;100 characters.</span>
+                  </div>
+                  <div className="flex items-start gap-3 p-3 bg-neutral-900/80 rounded-xl border border-white/[0.06]">
+                    <CheckCircle2 className="w-5 h-5 text-[#FDE047] shrink-0" />
+                    <span><strong>Cross-Device Attack DNA:</strong> Synthesizes behavioral fingerprints to track persistent actors.</span>
+                  </div>
+                  <div className="flex items-start gap-3 p-3 bg-neutral-900/80 rounded-xl border border-white/[0.06]">
+                    <CheckCircle2 className="w-5 h-5 text-[#FDE047] shrink-0" />
+                    <span><strong>Sub-382ms Autonomous Kill:</strong> Automatically severs sockets without waiting for human SOC analysts.</span>
                   </div>
                 </div>
               </div>
+            </Reveal>
 
-              {/* Right Column: Donut Match Indicator */}
-              <div className="lg:col-span-4 flex flex-col items-center justify-center p-6 border-t lg:border-t-0 lg:border-l border-[#E7E5E4]">
-                <div className="relative w-36 h-36 flex items-center justify-center">
-                  <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-                    <path
-                      className="text-[#E7E5E4]"
-                      strokeWidth="3.5"
-                      stroke="currentColor"
-                      fill="none"
-                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                    />
-                    <path
-                      className="text-indigo-600"
-                      strokeDasharray="82.4, 100"
-                      strokeWidth="3.5"
-                      strokeLinecap="round"
-                      stroke="currentColor"
-                      fill="none"
-                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                    />
-                  </svg>
-                  <div className="absolute flex flex-col items-center justify-center text-center">
-                    <span className="text-2xl font-bold font-mono text-indigo-600">82.4%</span>
-                    <span className="text-[9px] font-mono text-[#78716C] uppercase font-bold">DNA MATCH</span>
-                  </div>
-                </div>
-                <span className="mt-3 text-xs font-semibold text-indigo-900 bg-indigo-50 border border-indigo-200 px-2.5 py-1 rounded-full">
-                  HIGH CONFIDENCE ATTRIBUTION
-                </span>
-              </div>
-            </div>
           </div>
-        </Reveal>
-      </section>
 
-      {/* 7. Section: Platform Benchmarks */}
-      <section className="px-6 lg:px-12 py-16 bg-white border-y border-[#E7E5E4]">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-            <Reveal delay={100}>
-              <div className="p-6 rounded-xl bg-[#FAFAF9] border border-[#E7E5E4]">
-                <div className="text-3xl font-extrabold font-mono text-indigo-600">&lt; 420ms</div>
-                <div className="text-xs text-[#78716C] mt-1 font-medium">Autonomous Response</div>
-              </div>
-            </Reveal>
-            <Reveal delay={200}>
-              <div className="p-6 rounded-xl bg-[#FAFAF9] border border-[#E7E5E4]">
-                <div className="text-3xl font-extrabold font-mono text-[#1C1917]">0.00%</div>
-                <div className="text-xs text-[#78716C] mt-1 font-medium">Canary False Positives</div>
-              </div>
-            </Reveal>
-            <Reveal delay={300}>
-              <div className="p-6 rounded-xl bg-[#FAFAF9] border border-[#E7E5E4]">
-                <div className="text-3xl font-extrabold font-mono text-emerald-600">82.4%</div>
-                <div className="text-xs text-[#78716C] mt-1 font-medium">Cross-Device DNA Match</div>
-              </div>
-            </Reveal>
-            <Reveal delay={400}>
-              <div className="p-6 rounded-xl bg-[#FAFAF9] border border-[#E7E5E4]">
-                <div className="text-3xl font-extrabold font-mono text-[#1C1917]">100%</div>
-                <div className="text-xs text-[#78716C] mt-1 font-medium">Autonomous Containment</div>
-              </div>
-            </Reveal>
-          </div>
         </div>
       </section>
 
-      {/* 8. Call to Action Banner */}
-      <section className="px-6 lg:px-12 py-20 max-w-7xl mx-auto">
-        <Reveal>
-          <div className="p-10 rounded-3xl bg-indigo-600 text-white text-center space-y-6 shadow-sm relative overflow-hidden">
-            <div className="max-w-2xl mx-auto space-y-3">
-              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-                Ready to hunt threats before the OS even mounts the driver?
-              </h2>
-              <p className="text-sm sm:text-base text-indigo-100 leading-relaxed">
-                Step inside the live security console. Trigger multi-stage attacks, watch the AI narrator stream in real-time, and scrub through the causal graph.
-              </p>
+
+      {/* =========================================================================
+          SECTION 4: LIVE TERMINAL DEFENSE SIMULATOR (Interactive Demo)
+          ========================================================================= */}
+      <section id="demo" className="bg-[#0A0A0A] py-20 px-6 md:px-12 border-t border-white/[0.06]">
+        <div className="max-w-6xl mx-auto">
+          
+          <Reveal>
+            <div className="flex flex-col md:flex-row items-start md:items-end justify-between mb-8 gap-4">
+              <div>
+                <span className="text-[#FDE047] font-bold text-xs tracking-widest uppercase mb-2 block">
+                  LIVE TELEMETRY STREAM
+                </span>
+                <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
+                  Watch Autonomous Defense in Real-Time
+                </h2>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setIsTerminalPlaying(!isTerminalPlaying)}
+                  className="px-4 py-2 rounded-full border border-white/10 bg-neutral-900 hover:bg-neutral-800 text-xs font-semibold text-white flex items-center gap-1.5 pill-button cursor-pointer"
+                >
+                  {isTerminalPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+                  <span>{isTerminalPlaying ? "Pause Feed" : "Resume Feed"}</span>
+                </button>
+                <button
+                  onClick={copyTelemetry}
+                  className="px-4 py-2 rounded-full border border-white/10 bg-neutral-900 hover:bg-neutral-800 text-xs font-semibold text-white flex items-center gap-1.5 pill-button cursor-pointer"
+                >
+                  {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                  <span>{copied ? "Copied" : "Copy Logs"}</span>
+                </button>
+              </div>
+            </div>
+          </Reveal>
+
+          {/* Terminal Console Card */}
+          <div className="bg-[#141414] border border-white/[0.08] rounded-[28px] overflow-hidden shadow-2xl font-mono text-xs">
+            
+            {/* Terminal Window Header */}
+            <div className="bg-[#0F0F0F] px-6 py-4 border-b border-white/[0.06] flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full bg-red-500/80 inline-block" />
+                <span className="w-3 h-3 rounded-full bg-yellow-500/80 inline-block" />
+                <span className="w-3 h-3 rounded-full bg-emerald-500/80 inline-block" />
+                <span className="text-neutral-400 text-xs ml-3 font-mono">phantom-kernel-enforcer.sys • live-telemetry</span>
+              </div>
+              <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-[#FDE047]/10 text-[#FDE047] border border-[#FDE047]/20 font-bold">
+                SUB-SECOND INTERCEPT
+              </span>
             </div>
 
-            <div className="flex flex-wrap justify-center items-center gap-4">
+            {/* Terminal Log Rows */}
+            <div className="p-6 md:p-8 space-y-3 bg-[#0A0A0A]/90 min-h-[280px]">
+              {terminalLogs.slice(0, terminalStep + 1).map((log, idx) => {
+                const isKill = log.lvl === "KILL";
+                const isCrit = log.lvl === "CRIT";
+                const isWarn = log.lvl === "WARN";
+                return (
+                  <div
+                    key={idx}
+                    className={`flex items-start gap-3 p-2.5 rounded-xl transition-all duration-300 ${
+                      idx === terminalStep
+                        ? isKill
+                          ? "bg-red-950/40 border border-red-500/40"
+                          : "bg-neutral-900 border border-white/10"
+                        : "opacity-80"
+                    }`}
+                  >
+                    <span className="text-neutral-500 shrink-0 font-mono text-[11px]">{log.t}</span>
+                    <span
+                      className={`px-2 py-0.5 rounded text-[10px] font-bold shrink-0 font-mono ${
+                        isKill
+                          ? "bg-red-500 text-black font-extrabold"
+                          : isCrit
+                          ? "bg-red-500/20 text-red-400 border border-red-500/30"
+                          : isWarn
+                          ? "bg-yellow-500/20 text-yellow-300 border border-yellow-500/30"
+                          : "bg-neutral-800 text-neutral-300"
+                      }`}
+                    >
+                      {log.src}
+                    </span>
+                    <span
+                      className={`leading-relaxed text-xs ${
+                        isKill ? "text-red-300 font-bold" : isCrit ? "text-red-300" : isWarn ? "text-yellow-100" : "text-neutral-300"
+                      }`}
+                    >
+                      {log.msg}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Terminal Footer with Action Pill */}
+            <div className="p-4 px-6 bg-[#0F0F0F] border-t border-white/[0.06] flex items-center justify-between">
+              <span className="text-xs text-neutral-400 font-mono">
+                Frame {terminalStep + 1} of {terminalLogs.length} • Autonomous enforcer armed
+              </span>
               <button
                 onClick={onLaunchConsole}
-                className="flex items-center gap-2 px-6 py-3 rounded-xl bg-white text-indigo-700 text-sm font-bold shadow-md hover:bg-indigo-50 transition-all"
+                className="bg-[#FDE047] hover:bg-[#FACC15] text-black font-bold text-xs px-5 py-2 rounded-full pill-button transition-all cursor-pointer flex items-center gap-1.5"
               >
-                <span>Launch PHANTOM Console</span>
-                <ArrowRight className="w-4 h-4" />
+                <span>Launch Full Console</span>
+                <ArrowRight className="w-3.5 h-3.5" />
               </button>
-              <a
-                href="http://localhost:8001/api/download/app"
-                download
-                className="flex items-center gap-2 px-6 py-3 rounded-xl bg-indigo-700 hover:bg-indigo-800 text-white text-sm font-bold border border-indigo-500 shadow-md transition-all"
-              >
-                <Download className="w-4 h-4" />
-                <span>Download Desktop Agent (.exe)</span>
-              </a>
             </div>
+
           </div>
-        </Reveal>
+
+        </div>
       </section>
 
-      {/* 9. Footer */}
-      <footer className="px-6 lg:px-12 py-8 border-t border-[#E7E5E4] text-center text-xs text-[#78716C]">
-        <div className="flex items-center justify-center gap-2 mb-2">
-          <span className="font-bold text-[#1C1917]">PHANTOM</span>
-          <span>•</span>
-          <span>Autonomous USB Threat Hunting & Deception Platform</span>
+
+      {/* =========================================================================
+          SECTION 5: BENCHMARKS & METRICS ROW
+          ========================================================================= */}
+      <section id="benchmarks" className="bg-[#0A0A0A] py-20 px-6 md:px-12 border-t border-white/[0.06]">
+        <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6">
+          
+          <div className="bg-[#141414] border border-white/[0.04] p-6 rounded-[28px] text-center">
+            <span className="text-3xl sm:text-4xl md:text-5xl font-black text-[#FDE047] font-mono block mb-1">&lt;382ms</span>
+            <span className="text-xs font-semibold text-neutral-400 uppercase tracking-wider">Median Containment Time</span>
+          </div>
+
+          <div className="bg-[#141414] border border-white/[0.04] p-6 rounded-[28px] text-center">
+            <span className="text-3xl sm:text-4xl md:text-5xl font-black text-white font-mono block mb-1">0%</span>
+            <span className="text-xs font-semibold text-neutral-400 uppercase tracking-wider">Canary False Positives</span>
+          </div>
+
+          <div className="bg-[#141414] border border-white/[0.04] p-6 rounded-[28px] text-center">
+            <span className="text-3xl sm:text-4xl md:text-5xl font-black text-[#FDE047] font-mono block mb-1">82.4%</span>
+            <span className="text-xs font-semibold text-neutral-400 uppercase tracking-wider">Jaccard DNA Match</span>
+          </div>
+
+          <div className="bg-[#141414] border border-white/[0.04] p-6 rounded-[28px] text-center">
+            <span className="text-3xl sm:text-4xl md:text-5xl font-black text-white font-mono block mb-1">100%</span>
+            <span className="text-xs font-semibold text-neutral-400 uppercase tracking-wider">Autonomous Execution</span>
+          </div>
+
         </div>
-        <p className="text-[11px] text-[#A8A29E]">Designed for National Cyber Hackathon Finals. Precision Security System.</p>
+      </section>
+
+
+      {/* =========================================================================
+          SECTION 6: LIQUID CTA BANNER (Asymmetrical Yellow Curve)
+          ========================================================================= */}
+      <section className="bg-[#0A0A0A] py-16 px-6 md:px-12">
+        <div className="max-w-7xl mx-auto">
+          <div className="bg-[#FDE047] text-black rounded-[40px] md:rounded-[60px] p-10 md:p-16 shadow-2xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-8">
+            
+            <div className="max-w-xl text-left">
+              <span className="text-black/70 font-bold text-xs uppercase tracking-widest mb-2 block">
+                TRY PHANTOM LIVE
+              </span>
+              <h2 className="text-4xl sm:text-5xl md:text-6xl font-black text-black tracking-tight leading-[0.95] mb-4">
+                Secure your hardware blind spot today.
+              </h2>
+              <p className="text-base text-black/80 font-medium">
+                Experience sub-second autonomous hardware zero-day defense in your own browser sandbox.
+              </p>
+            </div>
+
+            <div className="shrink-0">
+              <button
+                onClick={onLaunchConsole}
+                className="bg-black hover:bg-neutral-900 text-white font-bold text-base px-9 py-4 rounded-full pill-button shadow-2xl flex items-center gap-3 cursor-pointer"
+              >
+                <span>Launch Live Console</span>
+                <ArrowRight className="w-5 h-5" />
+              </button>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+
+      {/* =========================================================================
+          SECTION 7: THE VOID FOOTER
+          ========================================================================= */}
+      <footer className="bg-[#0A0A0A] py-12 px-6 md:px-12 border-t border-white/[0.06] text-neutral-500 text-xs">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+          
+          <div className="flex items-center gap-3">
+            <img
+              src="/phantom-logo-white.png"
+              alt="PHANTOM"
+              className="h-7 md:h-8 w-auto object-contain select-none"
+            />
+            <span className="text-neutral-600">|</span>
+            <span>Autonomous Peripheral Zero-Day Defense</span>
+          </div>
+
+          <div className="flex items-center gap-6 font-medium">
+            <a href="#features" className="hover:text-white transition-colors">Features</a>
+            <a href="#architecture" className="hover:text-white transition-colors">Architecture</a>
+            <a href="#benchmarks" className="hover:text-white transition-colors">Benchmarks</a>
+            <button onClick={onLaunchConsole} className="text-[#FDE047] hover:underline font-bold">
+              Console →
+            </button>
+          </div>
+
+          <div>
+            © 2026 PHANTOM Cybersecurity. All rights reserved.
+          </div>
+
+        </div>
       </footer>
+
     </div>
   );
 }

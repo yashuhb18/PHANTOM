@@ -1,61 +1,61 @@
 import React from 'react';
-import { Dna, ShieldAlert, Layers } from 'lucide-react';
+import { Dna } from 'lucide-react';
 import { AlertBadge } from '../common/AlertBadge';
 
 export function FingerprintList({ fingerprints, selectedId, onSelect }) {
   if (!fingerprints || fingerprints.length === 0) {
     return (
-      <div className="bg-white border border-[#E7E5E4] rounded-xl p-8 text-center text-xs text-[#78716C]">
+      <div className="bg-[#141414] border border-white/[0.06] rounded-[28px] p-8 text-center text-xs text-neutral-500">
         No Attack DNA fingerprints cataloged yet.
       </div>
     );
   }
 
   return (
-    <div className="bg-white border border-[#E7E5E4] rounded-xl overflow-hidden">
-      <div className="p-4 border-b border-[#E7E5E4] flex items-center justify-between bg-[#FAFAF9]">
-        <div className="flex items-center gap-2">
-          <Dna className="w-4 h-4 text-indigo-600" />
-          <h3 className="text-xs font-semibold text-[#1C1917]">Cataloged Attack DNA Fingerprints</h3>
+    <div className="bg-[#141414] border border-white/[0.06] rounded-[28px] overflow-hidden shadow-2xl">
+      <div className="px-6 py-4 border-b border-white/[0.06] flex items-center justify-between bg-[#0F0F0F]">
+        <div className="flex items-center gap-2.5">
+          <Dna className="w-4 h-4 text-[#FDE047]" />
+          <h3 className="text-xs font-bold text-white uppercase tracking-wide">Cataloged Attack DNA</h3>
         </div>
-        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white text-[#78716C] border border-[#E7E5E4]">
+        <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-white/[0.04] text-neutral-300 border border-white/[0.08]">
           {fingerprints.length} Signatures
         </span>
       </div>
 
-      <div className="divide-y divide-[#E7E5E4]">
+      <div className="divide-y divide-white/[0.04]">
         {fingerprints.map((fp) => {
           const isSelected = selectedId === fp.session_id;
           return (
             <div
               key={fp.session_id}
               onClick={() => onSelect && onSelect(fp)}
-              className={`p-4 cursor-pointer transition-colors ${
-                isSelected ? 'bg-indigo-50/70 border-l-4 border-indigo-600' : 'hover:bg-[#FAFAF9]'
+              className={`p-5 px-6 cursor-pointer transition-colors ${
+                isSelected ? 'bg-[#FDE047]/10 border-l-4 border-[#FDE047]' : 'hover:bg-white/[0.02]'
               }`}
             >
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="font-semibold text-xs text-[#1C1917]">{fp.cluster_family}</span>
-                  <span className="text-[10px] font-mono bg-[#F5F5F4] px-1.5 py-0.2 rounded border border-[#E7E5E4] text-[#78716C]">
+                <div className="flex items-center gap-2.5">
+                  <span className="font-bold text-xs text-white">{fp.cluster_family}</span>
+                  <span className="text-[10px] font-mono bg-neutral-900 px-2 py-0.5 rounded-full border border-white/[0.08] text-neutral-400">
                     DNA: {fp.dna_hash}
                   </span>
                 </div>
                 <AlertBadge severity={fp.risk_score >= 60 ? 'CRITICAL' : 'HIGH'} />
               </div>
 
-              <div className="flex items-center gap-2 mt-2 text-[11px] text-[#78716C]">
-                <span className="font-mono text-[#A8A29E]">{fp.session_id}</span>
+              <div className="flex items-center gap-2 mt-2 text-[11px] text-neutral-400">
+                <span className="font-mono text-neutral-500">{fp.session_id}</span>
                 <span>•</span>
                 <span>{fp.device_name || 'USB Peripheral'}</span>
               </div>
 
               {fp.tokens && (
-                <div className="flex flex-wrap gap-1 mt-2.5">
+                <div className="flex flex-wrap gap-1.5 mt-3">
                   {fp.tokens.map((token, idx) => (
                     <span
                       key={idx}
-                      className="px-1.5 py-0.5 rounded text-[9px] font-mono bg-white text-[#44403C] border border-[#E7E5E4]"
+                      className="px-2 py-0.5 rounded-full text-[9px] font-mono bg-neutral-900 text-neutral-300 border border-white/[0.06]"
                     >
                       {token}
                     </span>

@@ -1,5 +1,6 @@
 import re
 import sys
+import os
 import time
 import logging
 from typing import Dict, List, Any, Optional
@@ -321,9 +322,41 @@ class HardwareAgent:
                             "TRANSMEMORY" in d_name.upper() or
                             pnp_class.upper() == "DISKDRIVE"
                         ):
-                            # Accurately identify USB removable storage drives
-                            is_already_stored = any(s.get("pnp_id") == pnp_id or s.get("hardware_id") == f"VID_{parsed['vendor_id']}&PID_{parsed['product_id']}" for s in storage_devices)
-                            if not is_already_stored:
+                            # Accurately identify and enrich USB removable storage drives without duplicates
+                            matched_existing = None
+                            for s in storage_devices:
+                                s_serial = str(s.get("serial_number", ""))
+                                p_serial = str(parsed.get("serial_number", ""))
+                                if (
+                                    (p_serial and (p_serial in s_serial or s_serial in p_serial)) or
+                                    s.get("pnp_id") == pnp_id or 
+                                    s.get("hardware_id") == f"VID_{parsed['vendor_id']}&PID_{parsed['product_id']}"
+                                ):
+                                    matched_existing = s
+                                    break
+
+                            if matched_existing:
+                                # Enrich with true USB hardware IDs and manufacturer name
+                                if parsed["vendor_id"] != "0000":
+                                    matched_existing["vendor_id"] = parsed["vendor_id"]
+                                    matched_existing["product_id"] = parsed["product_id"]
+                                    matched_existing["hardware_id"] = f"VID_{parsed['vendor_id']}&PID_{parsed['product_id']}"
+                                if parsed["vendor_name"] != "Unknown":
+                                    matched_existing["vendor_name"] = parsed["vendor_name"]
+                                    matched_existing["device_name"] = f"{parsed['vendor_name']} Flash Storage"
+                            elif not storage_devices:
+                                # Fallback only if no storage device was discovered in step 3
+                                active_threats = []
+                                target_mp = "E:\\"
+                                try:
+                                    if os.path.exists(target_mp):
+                                        for fname in os.listdir(target_mp):
+                                            ext = os.path.splitext(fname)[1].lower()
+                                            if ext in {".bat", ".cmd", ".ps1", ".vbs", ".js", ".hta", ".scr"} or fname.lower() == "autorun.inf":
+                                                active_threats.append(fname)
+                                except Exception:
+                                    pass
+
                                 storage_devices.append({
                                     "type": "USB_FLASH_DRIVE",
                                     "category": "REMOVABLE_STORAGE",
@@ -336,14 +369,17 @@ class HardwareAgent:
                                     "pnp_id": pnp_id,
                                     "hardware_id": f"VID_{parsed['vendor_id']}&PID_{parsed['product_id']}",
                                     "capacity_gb": 16.0,
-                                    "mount_point": "E:\\",
+                                    "mount_point": target_mp,
                                     "filesystem": "FAT32/exFAT",
                                     "used_gb": 0.5,
                                     "free_gb": 15.5,
                                     "percent_used": 3.2,
                                     "zero_trust_status": "UNTRUSTED",
                                     "triage_state": "ANALYSIS_READY",
-                                    "is_active_triage": True
+                                    "is_active_triage": True,
+                                    "has_threat": len(active_threats) > 0,
+                                    "active_threats": active_threats,
+                                    "primary_threat": active_threats[0] if active_threats else None,
                                 })
                         else:
                             integrated_devices.append({
@@ -447,6 +483,17 @@ class HardwareAgent:
                     if not matched_mount and removable_mounts:
                         matched_mount = list(removable_mounts.values())[0]
 
+                    target_mp = matched_mount["mount_point"] if matched_mount else "E:\\"
+                    active_threats = []
+                    try:
+                        if os.path.exists(target_mp):
+                            for fname in os.listdir(target_mp):
+                                ext = os.path.splitext(fname)[1].lower()
+                                if ext in {".bat", ".cmd", ".ps1", ".vbs", ".js", ".hta", ".scr"} or fname.lower() == "autorun.inf":
+                                    active_threats.append(fname)
+                    except Exception:
+                        pass
+
                     drives.append({
                         "type": "USB_FLASH_DRIVE",
                         "category": "REMOVABLE_STORAGE",
@@ -459,14 +506,17 @@ class HardwareAgent:
                         "pnp_id": pnp_id,
                         "hardware_id": f"VID_{parsed['vendor_id']}&PID_{parsed['product_id']}",
                         "capacity_gb": size_gb,
-                        "mount_point": matched_mount["mount_point"] if matched_mount else "E:\\",
+                        "mount_point": target_mp,
                         "filesystem": matched_mount["fstype"] if matched_mount else "FAT32/exFAT",
                         "used_gb": matched_mount["used_gb"] if matched_mount else 0.0,
                         "free_gb": matched_mount["free_gb"] if matched_mount else size_gb,
                         "percent_used": matched_mount["percent_used"] if matched_mount else 0.0,
                         "zero_trust_status": "UNTRUSTED",
                         "triage_state": "ANALYSIS_READY",
-                        "is_active_triage": True
+                        "is_active_triage": True,
+                        "has_threat": len(active_threats) > 0,
+                        "active_threats": active_threats,
+                        "primary_threat": active_threats[0] if active_threats else None,
                     })
         except Exception as e:
             logger.warning(f"Error enumerating Win32_DiskDrive: {e}")
@@ -474,6 +524,17 @@ class HardwareAgent:
         if not drives:
             for mpoint, info in removable_mounts.items():
                 if info["is_removable"] or (mpoint not in ("C:", "D:")):
+                    target_mp = info["mount_point"]
+                    active_threats = []
+                    try:
+                        if os.path.exists(target_mp):
+                            for fname in os.listdir(target_mp):
+                                ext = os.path.splitext(fname)[1].lower()
+                                if ext in {".bat", ".cmd", ".ps1", ".vbs", ".js", ".hta", ".scr"} or fname.lower() == "autorun.inf":
+                                    active_threats.append(fname)
+                    except Exception:
+                        pass
+
                     drives.append({
                         "type": "USB_FLASH_DRIVE",
                         "category": "REMOVABLE_STORAGE",
@@ -493,7 +554,10 @@ class HardwareAgent:
                         "percent_used": info["percent_used"],
                         "zero_trust_status": "UNTRUSTED",
                         "triage_state": "ANALYSIS_READY",
-                        "is_active_triage": True
+                        "is_active_triage": True,
+                        "has_threat": len(active_threats) > 0,
+                        "active_threats": active_threats,
+                        "primary_threat": active_threats[0] if active_threats else None,
                     })
 
         return drives

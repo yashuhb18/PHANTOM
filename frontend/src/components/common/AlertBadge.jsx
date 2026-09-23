@@ -2,18 +2,18 @@ import React from 'react';
 
 export function AlertBadge({ severity }) {
   const styles = {
-    CRITICAL: 'bg-red-50 text-red-700 border-red-200',
-    HIGH: 'bg-amber-50 text-amber-700 border-amber-200',
-    MEDIUM: 'bg-yellow-50 text-yellow-700 border-yellow-200',
-    LOW: 'bg-blue-50 text-blue-700 border-blue-200',
-    INFO: 'bg-stone-50 text-stone-600 border-stone-200',
+    CRITICAL: 'bg-red-500/15 text-red-400 border-red-500/30',
+    HIGH: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
+    MEDIUM: 'bg-[#FDE047]/15 text-[#FDE047] border-[#FDE047]/30',
+    LOW: 'bg-blue-500/15 text-blue-400 border-blue-500/30',
+    INFO: 'bg-white/10 text-neutral-300 border-white/15',
   };
 
   const level = (severity || 'INFO').toUpperCase();
   const style = styles[level] || styles.INFO;
 
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono font-semibold border ${style}`}>
+    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold tracking-wider border ${style}`}>
       {level}
     </span>
   );

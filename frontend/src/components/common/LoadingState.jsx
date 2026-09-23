@@ -3,9 +3,9 @@ import { Loader2 } from 'lucide-react';
 
 export function LoadingState({ message = 'Loading telemetry...' }) {
   return (
-    <div className="flex flex-col items-center justify-center p-12 text-[#78716C]">
-      <Loader2 className="w-6 h-6 animate-spin text-indigo-600 mb-2" />
-      <span className="text-xs font-mono">{message}</span>
+    <div className="flex flex-col items-center justify-center p-16 text-neutral-400">
+      <Loader2 className="w-7 h-7 animate-spin text-[#FDE047] mb-3" />
+      <span className="text-xs font-mono tracking-wider uppercase text-neutral-300">{message}</span>
     </div>
   );
 }

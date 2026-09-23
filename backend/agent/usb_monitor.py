@@ -348,7 +348,7 @@ class USBMonitor:
         Detects any new file creation and triggers immediate threat scanning.
         """
         try:
-            from watchdog.observers import Observer
+            from watchdog.observers.polling import PollingObserver
             from watchdog.events import FileSystemEventHandler
 
             class USBFileHandler(FileSystemEventHandler):
@@ -381,6 +381,40 @@ class USBMonitor:
                         except Exception as e:
                             logger.error(f"Error scanning new file {filepath}: {e}")
 
+                    # Broadcast fresh topology update to live UI
+                    try:
+                        topology = hardware_agent.get_hardware_topology(force_refresh=True)
+                        payload = {
+                            "source": "HARDWARE_AGENT",
+                            "event_type": "PORT_TOPOLOGY_UPDATED",
+                            "severity": "INFO",
+                            "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                            "topology": topology
+                        }
+                        self.broadcast_fn(ws_manager.broadcast_live(payload))
+                    except Exception:
+                        pass
+
+                def on_deleted(self, event):
+                    if event.is_directory:
+                        return
+                    filepath = event.src_path
+                    self._scanned_files.discard(filepath)
+                    logger.info(f"File removed/deleted from USB: {filepath}")
+                    # Broadcast fresh topology update so UI instantly clears threats
+                    try:
+                        topology = hardware_agent.get_hardware_topology(force_refresh=True)
+                        payload = {
+                            "source": "HARDWARE_AGENT",
+                            "event_type": "PORT_TOPOLOGY_UPDATED",
+                            "severity": "INFO",
+                            "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                            "topology": topology
+                        }
+                        self.broadcast_fn(ws_manager.broadcast_live(payload))
+                    except Exception as e:
+                        logger.error(f"Error updating topology after file deletion: {e}")
+
                 def on_modified(self, event):
                     if not event.is_directory:
                         ext = os.path.splitext(event.src_path)[1].lower()
@@ -388,7 +422,9 @@ class USBMonitor:
                             logger.warning(f"⚠️ DANGEROUS FILE MODIFIED ON USB: {event.src_path}")
 
             handler = USBFileHandler(session_id, self._event_loop, self._broadcast_safe)
-            observer = Observer()
+            # PollingObserver does not keep an open Win32 directory handle (ReadDirectoryChangesW),
+            # allowing the user and OS to safely eject the USB drive without 'Device in use' errors.
+            observer = PollingObserver(timeout=2.0)
             
             if os.path.exists(mount_point) and os.path.isdir(mount_point):
                 observer.schedule(handler, mount_point, recursive=True)

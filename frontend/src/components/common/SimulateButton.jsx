@@ -29,12 +29,12 @@ export function SimulateButton({ stage = 1, onComplete }) {
       <button
         onClick={handleSimulate}
         disabled={loading}
-        className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium shadow-sm transition-colors disabled:opacity-50"
+        className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FDE047] hover:bg-[#FACC15] text-black text-xs font-bold shadow-lg shadow-[#FDE047]/10 transition-all pill-button disabled:opacity-50 cursor-pointer"
       >
         {loading ? (
           <Loader2 className="w-3.5 h-3.5 animate-spin" />
         ) : done ? (
-          <CheckCircle className="w-3.5 h-3.5 text-emerald-300" />
+          <CheckCircle className="w-3.5 h-3.5 text-black" />
         ) : (
           <Play className="w-3.5 h-3.5 fill-current" />
         )}
@@ -47,14 +47,14 @@ export function SimulateButton({ stage = 1, onComplete }) {
     <button
       onClick={handleSimulate}
       disabled={loading}
-      className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium shadow-sm transition-colors disabled:opacity-50"
+      className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white hover:bg-neutral-200 text-black text-xs font-bold shadow-lg transition-all pill-button disabled:opacity-50 cursor-pointer"
     >
       {loading ? (
-        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+        <Loader2 className="w-3.5 h-3.5 animate-spin text-black" />
       ) : done ? (
-        <CheckCircle className="w-3.5 h-3.5 text-emerald-200" />
+        <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
       ) : (
-        <Sparkles className="w-3.5 h-3.5" />
+        <Sparkles className="w-3.5 h-3.5 text-black" />
       )}
       <span>{loading ? 'Simulating Attack #2...' : done ? 'Stage 2 Executed' : 'Simulate Attack #2 (82% DNA Match)'}</span>
     </button>
