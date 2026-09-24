@@ -66,12 +66,12 @@ export function Settings() {
         <div>
           <h2 className="text-sm font-bold text-white tracking-tight uppercase">System Settings & Engine Management</h2>
           <p className="text-xs text-neutral-400 mt-1">
-            Manage peripheral trust rules, local GLM-4 AI engine connections, and autonomous threat containment policies.
+            Manage peripheral trust rules, local AI reasoning engine connections, and autonomous threat containment policies.
           </p>
         </div>
       </div>
 
-      {/* GLM-4 Local AI Engine Status Card */}
+      {/* Local AI Engine Status Card */}
       <div className="bg-[#141414] border border-white/[0.06] rounded-[28px] overflow-hidden shadow-2xl p-6 space-y-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-white/[0.06] pb-4">
           <div className="flex items-center gap-3">
@@ -80,7 +80,7 @@ export function Settings() {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-xs font-bold text-white uppercase tracking-wide">GLM-4 Local AI Reasoning Engine</h3>
+                <h3 className="text-xs font-bold text-white uppercase tracking-wide">Local AI Reasoning Engine (Qwen 2.5 Coder)</h3>
                 <span className={`text-[10px] font-mono px-2.5 py-0.5 rounded-full border ${
                   aiStatus?.status === 'online'
                     ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
@@ -90,7 +90,7 @@ export function Settings() {
                 </span>
               </div>
               <p className="text-[11px] text-neutral-400 mt-0.5">
-                Local Ollama-backed LLM powering real-time script de-obfuscation, MITRE mapping, and SecOps Copilot.
+                High-speed local Ollama-backed LLM powering real-time script de-obfuscation, MITRE mapping, and SecOps Copilot.
               </p>
             </div>
           </div>
@@ -110,7 +110,7 @@ export function Settings() {
           <div className="p-4 rounded-2xl bg-[#0F0F0F] border border-white/[0.04]">
             <span className="text-[10px] font-mono text-neutral-400 uppercase">Configured Model</span>
             <div className="text-sm font-bold text-white font-mono mt-1">
-              {aiStatus?.model || 'glm4:latest'}
+              {aiStatus?.model || 'qwen2.5-coder:3b'}
             </div>
           </div>
 

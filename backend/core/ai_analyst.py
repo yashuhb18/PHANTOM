@@ -9,7 +9,7 @@ logger = logging.getLogger("phantom.core.ai_analyst")
 class AIAnalyst:
     """
     Generates real-time contextual threat narration and structured executive forensic briefs
-    powered by the local GLM-4 AI engine with resilient template fallbacks.
+    powered by the local Qwen-2.5 Coder AI engine with resilient template fallbacks.
     """
     def __init__(self):
         self._report_cache: Dict[str, Dict[str, Any]] = {}
@@ -143,9 +143,9 @@ class AIAnalyst:
                 glm_output = glm_client.generate(prompt=prompt, system=system_prompt, temperature=0.2)
                 if glm_output and len(glm_output) > 200:
                     report_md = glm_output
-                    engine_used = f"GLM-4 ({glm_client.model})"
+                    engine_used = f"SecOps AI ({glm_client.model})"
             except Exception as e:
-                logger.warning(f"GLM-4 report generation fallback triggered: {e}")
+                logger.warning(f"AI report generation fallback triggered: {e}")
 
         # Fallback to template if GLM was not used or failed
         if not report_md:

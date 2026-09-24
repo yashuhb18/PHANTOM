@@ -9,7 +9,7 @@ export function PhantomFloatingLogo({ onClick, isOpen }) {
         <Sparkles className="w-3.5 h-3.5 text-[#FDE047]" />
         <span>PHANTOM Copilot</span>
         <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-[#FDE047] text-black font-extrabold">
-          GLM-4
+          AI
         </span>
       </div>
 

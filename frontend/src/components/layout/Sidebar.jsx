@@ -63,7 +63,7 @@ export function Sidebar({ currentTab, setTab, onOpenCopilot }) {
           >
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-[#FDE047] animate-pulse" />
-              <span>GLM-4 Copilot</span>
+              <span>SecOps Copilot</span>
             </div>
             <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-[#FDE047] text-black font-extrabold">
               AI

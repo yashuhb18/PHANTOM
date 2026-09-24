@@ -128,7 +128,7 @@ export function SecOpsCopilotDrawer({ isOpen, onClose, selectedSessionId }) {
           const next = [...prev];
           next[next.length - 1] = { 
             role: 'assistant', 
-            content: `Apologies, Investigator. I encountered an issue contacting the GLM-4 engine: ${e.message}` 
+            content: `Apologies, Investigator. I encountered an issue contacting the AI engine: ${e.message}` 
           };
           return next;
         });
@@ -159,7 +159,7 @@ export function SecOpsCopilotDrawer({ isOpen, onClose, selectedSessionId }) {
         const data = await res.json();
         setAnalysisResult(data);
       } else {
-        setAnalysisResult({ error: 'Failed to analyze script via GLM-4.' });
+        setAnalysisResult({ error: 'Failed to analyze script via AI engine.' });
       }
     } catch (e) {
       setAnalysisResult({ error: e.message });

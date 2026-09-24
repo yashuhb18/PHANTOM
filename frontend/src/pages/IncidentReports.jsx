@@ -44,7 +44,7 @@ export function IncidentReports({ initialSessionId = 'sess_demo_stage1_ducky' })
     loadSingleReport(selectedSessionId);
   }, [selectedSessionId]);
 
-  const handleRegenerateWithGLM = async () => {
+  const handleRegenerateWithAI = async () => {
     if (!selectedSessionId || regenerating) return;
     setRegenerating(true);
     try {
@@ -56,7 +56,7 @@ export function IncidentReports({ initialSessionId = 'sess_demo_stage1_ducky' })
         setCurrentReport(data);
       }
     } catch (e) {
-      console.error("Error regenerating report with GLM-4:", e);
+      console.error("Error regenerating report with AI:", e);
     } finally {
       setRegenerating(false);
     }
@@ -92,13 +92,13 @@ export function IncidentReports({ initialSessionId = 'sess_demo_stage1_ducky' })
           )}
 
           <button
-            onClick={handleRegenerateWithGLM}
+            onClick={handleRegenerateWithAI}
             disabled={regenerating}
             className="text-xs font-bold px-4 py-1.5 rounded-full bg-[#FDE047]/15 hover:bg-[#FDE047]/25 text-[#FDE047] border border-[#FDE047]/30 flex items-center gap-2 transition-all cursor-pointer disabled:opacity-50"
-            title="Force GLM-4 to analyze telemetry and generate fresh executive brief"
+            title="Force local AI to analyze telemetry and generate fresh executive brief"
           >
             <Sparkles className={`w-3.5 h-3.5 ${regenerating ? 'animate-spin' : ''}`} />
-            <span>{regenerating ? 'GLM-4 Generating...' : 'Regenerate Brief with GLM-4'}</span>
+            <span>{regenerating ? 'AI Generating...' : 'Regenerate Brief with AI'}</span>
           </button>
         </div>
       </div>

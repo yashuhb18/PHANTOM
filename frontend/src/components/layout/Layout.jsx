@@ -23,7 +23,7 @@ export function Layout({ children, currentTab, setTab }) {
         onClick={() => setCopilotOpen(!copilotOpen)}
       />
 
-      {/* GLM-4 SecOps Copilot Drawer */}
+      {/* SecOps Copilot Drawer */}
       <SecOpsCopilotDrawer
         isOpen={copilotOpen}
         onClose={() => setCopilotOpen(false)}

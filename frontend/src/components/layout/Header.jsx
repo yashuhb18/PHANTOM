@@ -41,14 +41,14 @@ export function Header({ currentTab, setTab, onOpenCopilot }) {
           </span>
         </div>
 
-        {/* GLM-4 Copilot button */}
+        {/* SecOps Copilot button */}
         <button
           onClick={onOpenCopilot}
           className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FDE047]/15 hover:bg-[#FDE047]/25 border border-[#FDE047]/40 text-xs font-semibold text-[#FDE047] transition-all cursor-pointer shadow-lg shadow-[#FDE047]/5 shrink-0 group"
-          title="Open GLM-4 SecOps Copilot"
+          title="Open SecOps AI Copilot"
         >
           <span className="w-2 h-2 rounded-full bg-[#FDE047] animate-ping" />
-          <span>GLM-4 Copilot</span>
+          <span>SecOps Copilot</span>
         </button>
 
         {/* Back to product website pill button */}
