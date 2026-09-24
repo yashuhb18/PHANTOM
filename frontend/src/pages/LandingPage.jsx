@@ -30,6 +30,8 @@ import {
   Globe
 } from 'lucide-react';
 import { UsbPhantomAssembly } from '../components/landing/UsbPhantomAssembly';
+import { PhantomFloatingLogo } from '../components/ai/PhantomFloatingLogo';
+import { SecOpsCopilotDrawer } from '../components/ai/SecOpsCopilotDrawer';
 
 // Smooth Scroll-Reveal Wrapper using IntersectionObserver
 function Reveal({ children, delay = 0, className = "" }) {
@@ -68,6 +70,7 @@ export function LandingPage({ onLaunchConsole }) {
   const [isTerminalPlaying, setIsTerminalPlaying] = useState(true);
   const [copied, setCopied] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [copilotOpen, setCopilotOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -131,6 +134,22 @@ export function LandingPage({ onLaunchConsole }) {
           </nav>
 
           <div className="flex items-center gap-3">
+            <button
+              onClick={() => setCopilotOpen(true)}
+              className={`font-semibold text-xs sm:text-sm px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-full border transition-all duration-300 hover:scale-105 flex items-center gap-2 cursor-pointer shadow-sm ${
+                isScrolled
+                  ? 'bg-white/10 hover:bg-white/15 text-[#FDE047] border-[#FDE047]/30'
+                  : 'bg-black/5 hover:bg-black/10 text-black border-black/15'
+              }`}
+              title="Open PHANTOM SecOps Copilot"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-[#FDE047]" />
+              <span className="hidden sm:inline">Copilot</span>
+              <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-[#FDE047] text-black font-extrabold">
+                AI
+              </span>
+            </button>
+
             <button
               onClick={onLaunchConsole}
               className={`font-bold text-xs sm:text-sm px-4 sm:px-5 py-1.5 sm:py-2 rounded-full pill-button shadow-md flex items-center gap-1.5 sm:gap-2 cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95 ${
@@ -730,6 +749,18 @@ export function LandingPage({ onLaunchConsole }) {
 
         </div>
       </footer>
+
+      {/* Circular Floating PHANTOM Logo Button */}
+      <PhantomFloatingLogo
+        isOpen={copilotOpen}
+        onClick={() => setCopilotOpen(!copilotOpen)}
+      />
+
+      {/* SecOps Copilot Drawer */}
+      <SecOpsCopilotDrawer
+        isOpen={copilotOpen}
+        onClose={() => setCopilotOpen(false)}
+      />
 
     </div>
   );
