@@ -25,9 +25,9 @@ DECOY_DIR = BASE_DIR / "decoy_files"
 CANARY_WATCH_ENABLED = os.getenv("CANARY_WATCH_ENABLED", "True").lower() == "true"
 AI_NARRATION_INTERVAL = float(os.getenv("AI_NARRATION_INTERVAL", "1.5"))
 
-# AI / Ollama Inference Engine Config (Qwen 2.5 Coder 3B)
+# AI / Ollama Inference Engine Config (PHANTOM Copilot 3B)
 OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://localhost:11434")
-AI_MODEL = os.getenv("AI_MODEL", os.getenv("GLM_MODEL", "qwen2.5-coder:3b"))
+AI_MODEL = os.getenv("AI_MODEL", os.getenv("GLM_MODEL", "phantom-copilot:latest"))
 GLM_MODEL = AI_MODEL  # Backwards compatibility alias
 AI_TIMEOUT = float(os.getenv("AI_TIMEOUT", os.getenv("GLM_TIMEOUT", "60.0")))
 GLM_TIMEOUT = AI_TIMEOUT
