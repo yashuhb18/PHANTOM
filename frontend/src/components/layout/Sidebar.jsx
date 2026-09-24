@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
-export function Sidebar({ currentTab, setTab }) {
+export function Sidebar({ currentTab, setTab, onOpenCopilot }) {
   const { logout, user } = useAuth();
 
   const navItems = [
@@ -48,7 +48,7 @@ export function Sidebar({ currentTab, setTab }) {
         </div>
 
         {/* Product Website Quick Jump */}
-        <div className="p-3">
+        <div className="p-3 space-y-2">
           <button
             onClick={() => setTab('landing')}
             className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-full text-xs font-bold bg-[#FDE047]/10 hover:bg-[#FDE047]/20 text-[#FDE047] border border-[#FDE047]/30 transition-all cursor-pointer group"
@@ -56,7 +56,21 @@ export function Sidebar({ currentTab, setTab }) {
             <span>Product Website</span>
             <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
           </button>
+
+          <button
+            onClick={onOpenCopilot}
+            className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-full text-xs font-bold bg-white/[0.04] hover:bg-white/[0.08] text-white border border-white/[0.1] transition-all cursor-pointer group"
+          >
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-[#FDE047] animate-pulse" />
+              <span>GLM-4 Copilot</span>
+            </div>
+            <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-[#FDE047] text-black font-extrabold">
+              AI
+            </span>
+          </button>
         </div>
+
 
         {/* Navigation */}
         <nav className="px-3 py-1 space-y-1">

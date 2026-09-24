@@ -13,6 +13,7 @@ from backend.api.routes_reports import router as reports_router
 from backend.api.routes_devices import router as devices_router
 from backend.api.routes_simulate import router as simulate_router
 from backend.api.routes_scans import router as scans_router
+from backend.api.routes_ai import router as ai_router
 from backend.api.ws_routes import router as ws_router
 
 import asyncio
@@ -57,6 +58,7 @@ async def lifespan(app: FastAPI):
     logger.info("    ✅ Autorun Guardian Agent")
     logger.info("    ✅ Threat Scanner (on-demand per USB insertion)")
     logger.info("    ✅ Canary Deception Grid")
+    logger.info("    ✅ GLM-4 Local AI Threat Intelligence & Copilot")
     logger.info("  All agents operating in FULL AUTONOMOUS MODE")
     logger.info("  Zero human intervention required.")
     logger.info("═══════════════════════════════════════════════════════════")
@@ -96,6 +98,7 @@ app.include_router(reports_router)
 app.include_router(devices_router)
 app.include_router(simulate_router)
 app.include_router(scans_router)
+app.include_router(ai_router)
 app.include_router(ws_router)
 
 @app.get("/health")

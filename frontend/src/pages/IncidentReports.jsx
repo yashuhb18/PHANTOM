@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { IncidentReport } from '../components/reports/IncidentReport';
 import { LoadingState } from '../components/common/LoadingState';
+import { Sparkles, RefreshCw, Cpu } from 'lucide-react';
 
 export function IncidentReports({ initialSessionId = 'sess_demo_stage1_ducky' }) {
   const [reports, setReports] = useState([]);
   const [selectedSessionId, setSelectedSessionId] = useState(initialSessionId);
   const [currentReport, setCurrentReport] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [regenerating, setRegenerating] = useState(false);
 
   useEffect(() => {
     async function loadReports() {
@@ -23,23 +25,42 @@ export function IncidentReports({ initialSessionId = 'sess_demo_stage1_ducky' })
     loadReports();
   }, []);
 
-  useEffect(() => {
-    async function loadSingleReport() {
-      if (!selectedSessionId) return;
-      setLoading(true);
-      try {
-        const res = await fetch(`http://${window.location.hostname}:8001/api/reports/${selectedSessionId}`);
-        if (res.ok) {
-          setCurrentReport(await res.json());
-        }
-      } catch (e) {
-        console.error("Error loading report detail:", e);
-      } finally {
-        setLoading(false);
+  const loadSingleReport = async (sessionId) => {
+    if (!sessionId) return;
+    setLoading(true);
+    try {
+      const res = await fetch(`http://${window.location.hostname}:8001/api/reports/${sessionId}`);
+      if (res.ok) {
+        setCurrentReport(await res.json());
       }
+    } catch (e) {
+      console.error("Error loading report detail:", e);
+    } finally {
+      setLoading(false);
     }
-    loadSingleReport();
+  };
+
+  useEffect(() => {
+    loadSingleReport(selectedSessionId);
   }, [selectedSessionId]);
+
+  const handleRegenerateWithGLM = async () => {
+    if (!selectedSessionId || regenerating) return;
+    setRegenerating(true);
+    try {
+      const res = await fetch(`http://${window.location.hostname}:8001/api/ai/regenerate-report/${selectedSessionId}`, {
+        method: 'POST'
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setCurrentReport(data);
+      }
+    } catch (e) {
+      console.error("Error regenerating report with GLM-4:", e);
+    } finally {
+      setRegenerating(false);
+    }
+  };
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
@@ -62,13 +83,28 @@ export function IncidentReports({ initialSessionId = 'sess_demo_stage1_ducky' })
           </select>
         </div>
 
-        <span className="text-[10px] font-mono font-bold px-3 py-1 rounded-full bg-[#FDE047]/10 text-[#FDE047] border border-[#FDE047]/30 uppercase">
-          AI FORENSIC ENGINE
-        </span>
+        <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+          {currentReport?.engine && (
+            <span className="text-[10px] font-mono px-3 py-1 rounded-full bg-white/[0.04] text-neutral-300 border border-white/[0.08] flex items-center gap-1.5">
+              <Cpu className="w-3 h-3 text-[#FDE047]" />
+              {currentReport.engine}
+            </span>
+          )}
+
+          <button
+            onClick={handleRegenerateWithGLM}
+            disabled={regenerating}
+            className="text-xs font-bold px-4 py-1.5 rounded-full bg-[#FDE047]/15 hover:bg-[#FDE047]/25 text-[#FDE047] border border-[#FDE047]/30 flex items-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+            title="Force GLM-4 to analyze telemetry and generate fresh executive brief"
+          >
+            <Sparkles className={`w-3.5 h-3.5 ${regenerating ? 'animate-spin' : ''}`} />
+            <span>{regenerating ? 'GLM-4 Generating...' : 'Regenerate Brief with GLM-4'}</span>
+          </button>
+        </div>
       </div>
 
       {loading ? (
-        <LoadingState message="Generating structured forensic incident report..." />
+        <LoadingState message="Querying forensic telemetry and rendering incident brief..." />
       ) : (
         <IncidentReport report={currentReport} />
       )}

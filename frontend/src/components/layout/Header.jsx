@@ -2,7 +2,7 @@ import React from 'react';
 import { ExternalLink } from 'lucide-react';
 import { useWebSocket } from '../../hooks/useWebSocket';
 
-export function Header({ currentTab, setTab }) {
+export function Header({ currentTab, setTab, onOpenCopilot }) {
   const { isLiveConnected, isNarratorConnected } = useWebSocket();
 
   const titleMap = {
@@ -41,6 +41,16 @@ export function Header({ currentTab, setTab }) {
           </span>
         </div>
 
+        {/* GLM-4 Copilot button */}
+        <button
+          onClick={onOpenCopilot}
+          className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FDE047]/15 hover:bg-[#FDE047]/25 border border-[#FDE047]/40 text-xs font-semibold text-[#FDE047] transition-all cursor-pointer shadow-lg shadow-[#FDE047]/5 shrink-0 group"
+          title="Open GLM-4 SecOps Copilot"
+        >
+          <span className="w-2 h-2 rounded-full bg-[#FDE047] animate-ping" />
+          <span>GLM-4 Copilot</span>
+        </button>
+
         {/* Back to product website pill button */}
         <button
           onClick={() => setTab('landing')}
@@ -53,3 +63,4 @@ export function Header({ currentTab, setTab }) {
     </header>
   );
 }
+

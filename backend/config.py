@@ -24,3 +24,10 @@ DECOY_DIR = BASE_DIR / "decoy_files"
 # Deception & Agent Config
 CANARY_WATCH_ENABLED = os.getenv("CANARY_WATCH_ENABLED", "True").lower() == "true"
 AI_NARRATION_INTERVAL = float(os.getenv("AI_NARRATION_INTERVAL", "1.5"))
+
+# GLM / Ollama AI Model Config
+OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://localhost:11434")
+GLM_MODEL = os.getenv("GLM_MODEL", "glm4:latest")
+GLM_TIMEOUT = float(os.getenv("GLM_TIMEOUT", "90.0"))
+GLM_ENABLED = os.getenv("GLM_ENABLED", "True").lower() == "true"
+
